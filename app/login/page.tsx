@@ -1,5 +1,5 @@
 /**
- * Página de Login com Abas: Empresa x Funcionário
+ * Página de Login com Abas: Empresa / Autônomo / Funcionário
  * Role-based redirect após login
  */
 "use client";
@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2, Building2, UserCircle2 } from "lucide-react";
+import { Loader2, Building2, UserCircle2, User } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"empresa" | "funcionario">("empresa");
+  const [activeTab, setActiveTab] = useState<"empresa" | "autonomo" | "funcionario">("empresa");
 
   const supabase = createClient();
   const { toast } = useToast();
@@ -40,26 +40,45 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      // Buscar perfil para verificar role
+      // Buscar perfil para verificar role e empresa
       const { data: perfil } = await supabase
         .from("perfis")
-        .select("role")
+        .select("role, empresa_id")
         .eq("user_id", data.user.id)
         .single();
 
       if (!perfil) {
-        // Novo usuário empresa -> onboarding
-        router.push("/onboarding");
+        // Novo usuário -> onboarding baseado na aba
+        if (activeTab === "autonomo") {
+          router.push("/onboarding/solo");
+        } else {
+          router.push("/onboarding");
+        }
         return;
       }
 
-      // Redirecionar baseado no role
+      // Verificar se é empresa Solo
+      const { data: empresa } = await supabase
+        .from("empresas")
+        .select("is_solo")
+        .eq("id", perfil.empresa_id)
+        .single();
+
+      // Redirecionar baseado no role e tipo de empresa
       if (perfil.role === "owner") {
-        toast({
-          title: "Bem-vindo!",
-          description: "Acesso ao dashboard da empresa",
-        });
-        router.push("/dashboard");
+        if (empresa?.is_solo) {
+          toast({
+            title: "Bem-vindo ao Vendr Solo!",
+            description: "Acesso ao seu painel autônomo",
+          });
+          router.push("/solo");
+        } else {
+          toast({
+            title: "Bem-vindo!",
+            description: "Acesso ao dashboard da empresa",
+          });
+          router.push("/dashboard");
+        }
       } else if (perfil.role === "seller") {
         toast({
           title: "Olá vendedor!",
@@ -95,10 +114,14 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="empresa" className="gap-2">
                 <Building2 className="h-4 w-4" />
                 Empresa
+              </TabsTrigger>
+              <TabsTrigger value="autonomo" className="gap-2">
+                <User className="h-4 w-4" />
+                Autônomo
               </TabsTrigger>
               <TabsTrigger value="funcionario" className="gap-2">
                 <UserCircle2 className="h-4 w-4" />
@@ -146,6 +169,51 @@ export default function LoginPage() {
                   </Link>
                   <Link href="/onboarding" className="text-primary hover:underline">
                     Criar conta da empresa
+                  </Link>
+                </div>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="autonomo" className="space-y-4 mt-4">
+              <form onSubmit={handleAuth} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-autonomo">Email</Label>
+                  <Input
+                    id="email-autonomo"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password-autonomo">Senha</Label>
+                  <Input
+                    id="password-autonomo"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                    minLength={6}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full vendr-btn-primary" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Entrar como Autônomo
+                </Button>
+
+                <div className="flex flex-col gap-2 text-center text-sm">
+                  <Link href="/esqueci-senha" className="text-primary hover:underline">
+                    Esqueci minha senha
+                  </Link>
+                  <Link href="/onboarding/solo" className="text-primary hover:underline">
+                    Criar conta de autônomo
                   </Link>
                 </div>
               </form>
