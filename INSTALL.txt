@@ -1,0 +1,123 @@
+╔══════════════════════════════════════════════════════════════╗
+║                  VENDR - GUIA DE INSTALAÇÃO                  ║
+║          Sistema de Gestão de Vendas Externas                ║
+╚══════════════════════════════════════════════════════════════╝
+
+📋 REQUISITOS
+─────────────────────────────────────────────────────────────
+✓ Node.js 18+ 
+✓ npm ou yarn
+✓ Conta Supabase (grátis)
+✓ Git
+
+🚀 INSTALAÇÃO RÁPIDA (5 MINUTOS)
+─────────────────────────────────────────────────────────────
+
+1️⃣ INSTALAR DEPENDÊNCIAS
+   
+   npm install
+
+2️⃣ CONFIGURAR SUPABASE
+
+   a) Criar projeto em https://supabase.com
+   b) Copiar URL e chave anon em Settings → API
+   c) Executar SQL em SQL Editor:
+      - Abrir arquivo: supabase-schema.sql
+      - Copiar todo conteúdo
+      - Colar no SQL Editor
+      - Clicar "Run"
+
+3️⃣ CONFIGURAR AMBIENTE
+
+   cp .env.local.example .env.local
+   
+   Editar .env.local com suas credenciais:
+   
+   NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
+   NEXT_PUBLIC_VENDR_PIX_KEY=11999887766
+   NEXT_PUBLIC_TZ=America/Sao_Paulo
+
+4️⃣ EXECUTAR
+
+   npm run dev
+   
+   Abrir: http://localhost:3000
+
+5️⃣ PRIMEIRO ACESSO
+
+   a) Cadastrar-se em /login
+   b) Configurar empresa em /onboarding
+   c) Cadastrar produtos em /produtos
+   d) Cadastrar vendedores em /vendedores
+   e) Atribuir kit diário
+
+✅ PRONTO! Sistema rodando.
+
+─────────────────────────────────────────────────────────────
+
+📱 TESTAR OFFLINE
+
+1. Abrir DevTools (F12) → Network → Offline
+2. Registrar venda em /vendedor/venda
+3. Ver "Venda salva offline"
+4. Voltar Online
+5. Ver sincronização automática
+
+─────────────────────────────────────────────────────────────
+
+🔧 COMANDOS ÚTEIS
+
+npm run dev      - Executar desenvolvimento
+npm run build    - Build para produção
+npm run start    - Executar produção
+npm run lint     - Verificar erros
+npm run format   - Formatar código
+
+─────────────────────────────────────────────────────────────
+
+📚 DOCUMENTAÇÃO
+
+README.md         - Documentação completa
+QUICKSTART.md     - Guia rápido
+DEPLOYMENT.md     - Deploy produção
+CONTRIBUTING.md   - Como contribuir
+
+─────────────────────────────────────────────────────────────
+
+🐛 PROBLEMAS COMUNS
+
+"Cannot find module 'next'"
+→ Execute: npm install
+
+"User not found"
+→ Cadastre-se primeiro em /login
+
+"RLS error"
+→ Verifique se executou o SQL schema completo
+
+"Offline não funciona"
+→ PWA requer HTTPS ou localhost
+
+─────────────────────────────────────────────────────────────
+
+🚢 DEPLOY PRODUÇÃO
+
+Vercel (Recomendado):
+1. Push para GitHub
+2. Importar em vercel.com
+3. Configurar env vars
+4. Deploy!
+
+Veja DEPLOYMENT.md para detalhes.
+
+─────────────────────────────────────────────────────────────
+
+💬 SUPORTE
+
+GitHub Issues: github.com/seu-repo/vendr/issues
+Email: suporte@vendr.com
+
+─────────────────────────────────────────────────────────────
+
+Feito com ❤️ para vendedores ambulantes

@@ -1,0 +1,12 @@
+{
+  "name": "Vendr - Gestão de Vendas",
+  "short_name": "Vendr",
+  "description": "Sistema completo para gestão de vendas externas e ambulantes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0057FF",
+  "orientation": "portrait",
+  "icons": [],
+  "categories": ["business", "productivity"]
+}
