@@ -76,79 +76,59 @@ export default function VendedoresPage() {
     e.preventDefault();
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
-      const { data: perfil } = await supabase
-        .from("perfis")
-        .select("empresa_id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!perfil) throw new Error("Perfil não encontrado");
-
       if (editingId) {
+        // Atualizar vendedor existente
         const { error } = await supabase
           .from("vendedores")
           .update({
             nome,
             telefone,
-            doc,
+            documento: doc,
             comissao_padrao: comissaoPadrao / 100,
           })
           .eq("id", editingId);
 
         if (error) throw error;
-        toast({ title: "Vendedor atualizado!" });
+        
+        toast({ 
+          title: "Vendedor atualizado!",
+          description: "Dados atualizados com sucesso"
+        });
       } else {
-        // Validar email e senha
+        // Criar novo vendedor usando a API
         if (!email || !senha) {
           throw new Error("Email e senha são obrigatórios");
         }
 
-        if (senha.length < 6) {
-          throw new Error("A senha deve ter no mínimo 6 caracteres");
+        if (senha.length < 8) {
+          throw new Error("A senha deve ter no mínimo 8 caracteres");
         }
 
-        // 1. Criar usuário no Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email,
-          password: senha,
-        });
-
-        if (authError) throw authError;
-        if (!authData.user) throw new Error("Erro ao criar usuário");
-
-        // 2. Criar vendedor
-        const { data: vendedorData, error: vendedorError } = await supabase
-          .from("vendedores")
-          .insert({
+        // Chamar API para criar vendedor
+        const response = await fetch('/api/admin/create-seller', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
             nome,
-            telefone,
-            doc,
-            comissao_padrao: comissaoPadrao / 100,
-            empresa_id: perfil.empresa_id,
-          })
-          .select()
-          .single();
-
-        if (vendedorError) throw vendedorError;
-
-        // 3. Criar perfil do vendedor
-        const { error: perfilError } = await supabase.from("perfis").insert({
-          user_id: authData.user.id,
-          empresa_id: perfil.empresa_id,
-          nome,
-          role: "seller",
+            email,
+            senha,
+            telefone: telefone || undefined,
+            documento: doc || undefined,
+            comissao_padrao: comissaoPadrao,
+          }),
         });
 
-        if (perfilError) throw perfilError;
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || data.message || 'Erro ao criar vendedor');
+        }
 
         toast({ 
           title: "Vendedor criado!",
-          description: `Login: ${email}`,
+          description: data.message || `Login: ${email}`,
         });
       }
 
@@ -157,7 +137,7 @@ export default function VendedoresPage() {
     } catch (error: any) {
       console.error("Erro ao criar/atualizar vendedor:", error);
       toast({
-        title: "Erro ao criar vendedor",
+        title: "Erro",
         description: error.message || "Verifique os dados e tente novamente",
         variant: "destructive",
       });
@@ -271,9 +251,10 @@ export default function VendedoresPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="doc">CPF/RG</Label>
+                        <Label htmlFor="doc">CPF/RG/Documento</Label>
                         <Input
                           id="doc"
+                          placeholder="123.456.789-00"
                           value={doc}
                           onChange={(e) => setDoc(e.target.value)}
                         />
@@ -313,13 +294,13 @@ export default function VendedoresPage() {
                             <Input
                               id="senha"
                               type="password"
-                              placeholder="Mínimo 6 caracteres"
+                              placeholder="Mínimo 8 caracteres"
                               value={senha}
                               onChange={(e) => setSenha(e.target.value)}
                               required
-                              minLength={6}
+                              minLength={8}
                             />
-                            <p className="text-xs text-gray-500">Mínimo 6 caracteres</p>
+                            <p className="text-xs text-gray-500">Mínimo 8 caracteres</p>
                           </div>
                         </>
                       )}
