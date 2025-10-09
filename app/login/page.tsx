@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2, Building2, UserCircle2 } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -84,11 +85,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center">
-            <span className="text-primary">Ven</span>
-            <span className="text-secondary">dr</span>
-          </CardTitle>
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center">
+            <Logo size="lg" />
+          </div>
           <CardDescription className="text-center">
             Sistema de Gestão de Vendas Externas
           </CardDescription>

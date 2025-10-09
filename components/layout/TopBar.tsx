@@ -8,6 +8,7 @@ import { ArrowLeft, Home, LifeBuoy } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Logo } from "@/components/Logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,9 +83,9 @@ export function TopBar({ role, userName = "Usuário" }: TopBarProps) {
           <button
             onClick={handleHome}
             aria-label="Ir para início"
-            className="flex items-center gap-2 font-bold text-xl text-[var(--brand-primary)] hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            {process.env.NEXT_PUBLIC_APP_NAME || 'Vendr'}
+            <Logo size="sm" />
           </button>
         </div>
 

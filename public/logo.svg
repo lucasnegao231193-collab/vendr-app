@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 200">
+  <!-- Logo Vendr -->
+  <g>
+    <!-- Ícone da sacola -->
+    <path d="M80 40 C80 20, 100 20, 100 40 L120 60 L120 160 C120 180, 100 180, 80 180 L40 180 C20 180, 20 160, 20 160 L20 60 Z" 
+          fill="none" stroke="#0057FF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Check mark -->
+    <polyline points="45 95, 65 115, 95 75" 
+              fill="none" stroke="#FF6B35" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Texto "Vendr" -->
+    <text x="160" y="140" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="#0057FF">Vendr</text>
+  </g>
+</svg>

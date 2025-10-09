@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export default function OnboardingPage() {
   const [nomeEmpresa, setNomeEmpresa] = useState("");
@@ -78,7 +79,10 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center">
+            <Logo size="md" />
+          </div>
           <CardTitle>Configurar sua Empresa</CardTitle>
           <CardDescription>
             Configure os dados da sua empresa para começar a usar o Vendr
