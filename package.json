@@ -8,7 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\""
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "verify:site": "node ./scripts/verify-site.js",
+    "verify:fix": "npx eslint . --fix --ext .ts,.tsx,.js,.jsx && npm run verify:site"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -21,6 +23,7 @@
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
     "@supabase/ssr": "^0.1.0",

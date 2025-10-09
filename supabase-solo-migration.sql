@@ -28,21 +28,26 @@ CREATE INDEX IF NOT EXISTS idx_empresas_plano ON public.empresas(plano);
 ALTER TABLE public.solo_cotas ENABLE ROW LEVEL SECURITY;
 
 -- 5. Criar políticas RLS para solo_cotas
-CREATE POLICY IF NOT EXISTS "Users can view their own quota"
+-- (Remover políticas existentes se houver)
+DROP POLICY IF EXISTS "Users can view their own quota" ON public.solo_cotas;
+DROP POLICY IF EXISTS "Users can insert their own quota" ON public.solo_cotas;
+DROP POLICY IF EXISTS "Users can update their own quota" ON public.solo_cotas;
+
+CREATE POLICY "Users can view their own quota"
   ON public.solo_cotas
   FOR SELECT
   USING (empresa_id IN (
     SELECT empresa_id FROM public.perfis WHERE user_id = auth.uid()
   ));
 
-CREATE POLICY IF NOT EXISTS "Users can insert their own quota"
+CREATE POLICY "Users can insert their own quota"
   ON public.solo_cotas
   FOR INSERT
   WITH CHECK (empresa_id IN (
     SELECT empresa_id FROM public.perfis WHERE user_id = auth.uid()
   ));
 
-CREATE POLICY IF NOT EXISTS "Users can update their own quota"
+CREATE POLICY "Users can update their own quota"
   ON public.solo_cotas
   FOR UPDATE
   USING (empresa_id IN (

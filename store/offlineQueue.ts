@@ -3,7 +3,7 @@
  * Sincroniza automaticamente quando a conexão retorna
  */
 import { create } from "zustand";
-import { openDB, DBSchema, IDBPDatabase } from "idb";
+import { openDB, IDBPDatabase } from "idb";
 import { VendaInput } from "@/lib/validation";
 
 // ============================================
@@ -28,23 +28,15 @@ interface OfflineQueueState {
 }
 
 // ============================================
-// INDEXEDDB SCHEMA
+// INDEXEDDB
 // ============================================
 
-interface VendrDB extends DBSchema {
-  vendas_queue: {
-    key: string;
-    value: VendaOffline;
-    indexes: { timestamp: number; synced: boolean };
-  };
-}
-
-let db: IDBPDatabase<VendrDB> | null = null;
+let db: IDBPDatabase | null = null;
 
 async function getDB() {
   if (db) return db;
 
-  db = await openDB<VendrDB>("vendr-offline", 1, {
+  db = await openDB("vendr-offline", 1, {
     upgrade(db) {
       const store = db.createObjectStore("vendas_queue", { keyPath: "id" });
       store.createIndex("timestamp", "timestamp");
@@ -91,12 +83,6 @@ export const useOfflineQueue = create<OfflineQueueState>((set, get) => ({
 
         window.addEventListener("online", handleOnline);
         window.addEventListener("offline", handleOffline);
-
-        // Cleanup
-        return () => {
-          window.removeEventListener("online", handleOnline);
-          window.removeEventListener("offline", handleOffline);
-        };
       }
     } catch (error) {
       console.error("Erro ao inicializar offline queue:", error);

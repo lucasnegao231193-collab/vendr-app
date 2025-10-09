@@ -185,7 +185,6 @@ export async function POST(request: Request) {
         user_id: authData.user.id,
         empresa_id: empresaId,
         role: "seller",
-        nome: validated.nome,
       });
 
     if (perfilVendedorError) {

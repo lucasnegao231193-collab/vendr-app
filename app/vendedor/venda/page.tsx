@@ -135,6 +135,7 @@ export default function VendaPage() {
             qtd,
             valor_unit: produto.preco,
             meio_pagamento: meioPagamento!,
+            status: "confirmado" as const,
           };
         });
 
