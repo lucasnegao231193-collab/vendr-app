@@ -6,7 +6,6 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
-import { CreateSellerDialog } from "@/components/CreateSellerDialog";
 import { SkeletonTable } from "@/components/ui/SkeletonTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -47,6 +46,8 @@ export default function VendedoresPage() {
   const [telefone, setTelefone] = useState("");
   const [doc, setDoc] = useState("");
   const [comissaoPadrao, setComissaoPadrao] = useState(10);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
   const supabase = createClient();
   const { toast } = useToast();
@@ -102,16 +103,53 @@ export default function VendedoresPage() {
         if (error) throw error;
         toast({ title: "Vendedor atualizado!" });
       } else {
-        const { error } = await supabase.from("vendedores").insert({
-          nome,
-          telefone,
-          doc,
-          comissao_padrao: comissaoPadrao / 100,
-          empresa_id: perfil.empresa_id,
+        // Validar email e senha
+        if (!email || !senha) {
+          throw new Error("Email e senha são obrigatórios");
+        }
+
+        if (senha.length < 6) {
+          throw new Error("A senha deve ter no mínimo 6 caracteres");
+        }
+
+        // 1. Criar usuário no Supabase Auth
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password: senha,
         });
 
-        if (error) throw error;
-        toast({ title: "Vendedor criado!" });
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Erro ao criar usuário");
+
+        // 2. Criar vendedor
+        const { data: vendedorData, error: vendedorError } = await supabase
+          .from("vendedores")
+          .insert({
+            nome,
+            telefone,
+            doc,
+            comissao_padrao: comissaoPadrao / 100,
+            empresa_id: perfil.empresa_id,
+          })
+          .select()
+          .single();
+
+        if (vendedorError) throw vendedorError;
+
+        // 3. Criar perfil do vendedor
+        const { error: perfilError } = await supabase.from("perfis").insert({
+          user_id: authData.user.id,
+          empresa_id: perfil.empresa_id,
+          nome,
+          role: "seller",
+        });
+
+        if (perfilError) throw perfilError;
+
+        toast({ 
+          title: "Vendedor criado!",
+          description: `Login: ${email}`,
+        });
       }
 
       resetForm();
@@ -140,6 +178,8 @@ export default function VendedoresPage() {
     setTelefone("");
     setDoc("");
     setComissaoPadrao(10);
+    setEmail("");
+    setSenha("");
     setEditingId(null);
     setShowForm(false);
   };
@@ -185,7 +225,15 @@ export default function VendedoresPage() {
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">Vendedores</h1>
             <p className="text-[var(--text-secondary)]">Gerencie sua equipe de vendas</p>
           </div>
-          <CreateSellerDialog onSuccess={loadData} />
+          {!showForm && (
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-[#0057FF] hover:bg-[#0046CC] text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Criar Vendedor
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="lista">
@@ -244,6 +292,37 @@ export default function VendedoresPage() {
                           required
                         />
                       </div>
+
+                      {!editingId && (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="vendedor@email.com"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              required
+                            />
+                            <p className="text-xs text-gray-500">Será usado para login</p>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="senha">Senha *</Label>
+                            <Input
+                              id="senha"
+                              type="password"
+                              placeholder="Mínimo 6 caracteres"
+                              value={senha}
+                              onChange={(e) => setSenha(e.target.value)}
+                              required
+                              minLength={6}
+                            />
+                            <p className="text-xs text-gray-500">Mínimo 6 caracteres</p>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     <div className="flex gap-2">
