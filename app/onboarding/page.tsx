@@ -80,10 +80,10 @@ export default function OnboardingPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center w-full">
             <Logo size="md" />
           </div>
-          <CardTitle>Configurar sua Empresa</CardTitle>
+          <CardTitle className="text-center">Configurar sua Empresa</CardTitle>
           <CardDescription>
             Configure os dados da sua empresa para começar a usar o Vendr
           </CardDescription>

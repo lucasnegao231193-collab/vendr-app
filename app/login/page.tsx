@@ -86,7 +86,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center w-full">
             <Logo size="lg" />
           </div>
           <CardDescription className="text-center">
