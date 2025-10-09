@@ -126,3 +126,76 @@
 .pwa-install-banner {
   @apply fixed bottom-4 left-4 right-4 bg-white border-2 border-primary rounded-lg shadow-lg p-4 z-50;
 }
+
+/* Animações suaves */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+  
+  .animate-scale {
+    animation: scale 0.2s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Status Badges */
+.badge-active {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.badge-inactive {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+.badge-pending {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+/* Card com gradiente */
+.vendr-card-gradient {
+  @apply bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md p-6;
+}
+
+/* TopBar fixa */
+.vendr-topbar {
+  @apply fixed top-0 left-0 right-0 z-50 bg-[#0057FF] text-white shadow-lg;
+  height: 64px;
+}
+
+/* Botão flutuante WhatsApp */
+.whatsapp-float {
+  @apply fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-2xl transition-transform hover:scale-110;
+}

@@ -15,6 +15,12 @@ import { DollarSign, TrendingUp, CreditCard, ShoppingCart, Users, Package, Alert
 import { formatCurrency } from "@/lib/utils";
 import { SkeletonTable } from "@/components/ui/SkeletonTable";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ModernTopBar } from "@/components/ModernTopBar";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { QuickActions } from "@/components/QuickActions";
+import { AlertsCard, generateAlerts } from "@/components/AlertsCard";
+import { DashboardSkeleton } from "@/components/LoadingSkeleton";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -61,76 +67,126 @@ export default function DashboardPage() {
   const ticketMedio = vendas.length > 0 ? totalVendido / vendas.length : 0;
   const percentualPix = totalVendido > 0 ? (totalPix / totalVendido) * 100 : 0;
 
+  const alerts = generateAlerts(produtos, vendedores);
+
+  if (loading) {
+    return (
+      <AuthenticatedLayout requiredRole="owner">
+        <ModernTopBar userName="Admin" />
+        <div className="pt-20 px-4 md:px-6">
+          <DashboardSkeleton />
+        </div>
+      </AuthenticatedLayout>
+    );
+  }
+
   return (
     <AuthenticatedLayout requiredRole="owner">
-      <div className="space-y-6">
+      <ModernTopBar userName="Admin" />
+      <div className="pt-20 px-4 md:px-6 space-y-6 animate-fade-in">
+        <Breadcrumbs />
+        
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between"
+        >
           <div>
             <h1 className="text-3xl font-bold text-[var(--text-primary)]">Dashboard</h1>
             <p className="text-[var(--text-secondary)]">
               Hoje: {new Date().toLocaleDateString("pt-BR")}
             </p>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <QuickActions />
+
+        {/* Alerts */}
+        {alerts.length > 0 && <AlertsCard alerts={alerts} />}
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-white rounded-2xl border-[var(--border-soft)] shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
-                Total Vendido Hoje
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-[var(--brand-primary)]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-[var(--text-primary)]">
-                {formatCurrency(totalVendido)}
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="vendr-card-gradient hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
+                  Total Vendido Hoje
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-[var(--brand-primary)]" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">
+                  {formatCurrency(totalVendido)}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-white rounded-2xl border-[var(--border-soft)] shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
-                Ticket Médio
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-[var(--success)]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-[var(--text-primary)]">
-                {formatCurrency(ticketMedio)}
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="vendr-card-gradient hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
+                  Ticket Médio
+                </CardTitle>
+                <TrendingUp className="h-4 w-4 text-[var(--success)]" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">
+                  {formatCurrency(ticketMedio)}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-white rounded-2xl border-[var(--border-soft)] shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
-                PIX (%)
-              </CardTitle>
-              <CreditCard className="h-4 w-4 text-[var(--brand-accent)]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-[var(--text-primary)]">
-                {percentualPix.toFixed(1)}%
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="vendr-card-gradient hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
+                  PIX (%)
+                </CardTitle>
+                <CreditCard className="h-4 w-4 text-[var(--brand-accent)]" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">
+                  {percentualPix.toFixed(1)}%
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card className="bg-white rounded-2xl border-[var(--border-soft)] shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
-                Vendas Hoje
-              </CardTitle>
-              <ShoppingCart className="h-4 w-4 text-[var(--warning)]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-[var(--text-primary)]">
-                {vendas.length}
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="vendr-card-gradient hover:shadow-lg transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-[var(--text-secondary)]">
+                  Vendas Hoje
+                </CardTitle>
+                <ShoppingCart className="h-4 w-4 text-[var(--warning)]" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-[var(--text-primary)]">
+                  {vendas.length}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {/* Navegação Rápida */}
