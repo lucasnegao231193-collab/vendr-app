@@ -1,10 +1,10 @@
 /**
  * AppShell Component
- * Shell principal do app com TopBar, SideNav, BottomNav e conteúdo
+ * Shell principal do app com GlobalTopBar (azul #0057FF), SideNav, BottomNav e conteúdo
  */
 "use client";
 
-import { TopBar } from "./TopBar";
+import { GlobalTopBar } from "../GlobalTopBar";
 import { SideNav } from "./SideNav";
 import { BottomNav } from "./BottomNav";
 import { Breadcrumbs } from "./Breadcrumbs";
@@ -20,8 +20,8 @@ interface AppShellProps {
 export function AppShell({ children, role, userName }: AppShellProps) {
   return (
     <div className="min-h-screen bg-[var(--bg-soft)]">
-      {/* TopBar fixo */}
-      <TopBar role={role} userName={userName} />
+      {/* TopBar fixo azul */}
+      <GlobalTopBar role={role} userName={userName} />
 
       <div className="flex">
         {/* SideNav (desktop only) */}
