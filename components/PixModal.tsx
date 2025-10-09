@@ -14,7 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatCurrency, generatePixPayload } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+
+// Função simples para gerar payload PIX (simplificado)
+const generatePixPayload = (pixKey: string, valor: number, nome: string) => {
+  return `00020126360014BR.GOV.BCB.PIX0114${pixKey}520400005303986540${valor.toFixed(2)}5802BR5913${nome}6009SAO PAULO62070503***6304`;
+};
 import { Copy, Check } from "lucide-react";
 import QRCode from "qrcode";
 
@@ -31,7 +36,7 @@ export function PixModal({ open, onOpenChange, valor, onConfirm }: PixModalProps
   const [confirmed, setConfirmed] = useState(false);
 
   const pixKey = process.env.NEXT_PUBLIC_VENDR_PIX_KEY || "vendedor@pix.com";
-  const pixPayload = generatePixPayload(pixKey, valor);
+  const pixPayload = generatePixPayload(pixKey, valor, "Vendr");
 
   useEffect(() => {
     if (open) {
