@@ -53,15 +53,25 @@ export function CreateSellerDialog({ onSuccess }: CreateSellerDialogProps) {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || data.error || "Erro ao criar vendedor");
+      // Parse JSON sempre, independente do status
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new Error("Erro ao processar resposta do servidor");
       }
 
+      // Verificar status HTTP
+      if (!response.ok) {
+        // Extrair mensagem de erro do backend
+        const errorMessage = data?.message || data?.error || data?.details || "Erro ao criar vendedor";
+        throw new Error(errorMessage);
+      }
+
+      // Sucesso! (status 201)
       toast({
         title: "✅ Vendedor criado com sucesso!",
-        description: `${nome} já pode fazer login com o email e senha cadastrados.`,
+        description: data?.message || `${nome} já pode fazer login com o email e senha cadastrados.`,
       });
 
       // Limpar form
@@ -73,12 +83,15 @@ export function CreateSellerDialog({ onSuccess }: CreateSellerDialogProps) {
       setComissao("10");
       setOpen(false);
 
-      onSuccess?.();
+      // Callback de sucesso
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
-      console.error("Erro:", error);
+      console.error("❌ Erro ao criar vendedor:", error);
       toast({
         title: "Erro ao criar vendedor",
-        description: error.message,
+        description: error.message || "Ocorreu um erro inesperado",
         variant: "destructive",
       });
     } finally {
