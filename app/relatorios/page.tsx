@@ -1,5 +1,5 @@
 /**
- * Página de relatórios com filtros e exportação CSV
+ * Página de relatórios com filtros, tabs e exportação CSV
  */
 "use client";
 
@@ -8,7 +8,8 @@ import { createClient } from "@/lib/supabase-browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -17,9 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Filter } from "lucide-react";
+import { Download, Filter, X, BarChart3, TrendingUp, DollarSign } from "lucide-react";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { exportarVendasCSV } from "@/lib/db";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function RelatoriosPage() {
   const [dataInicio, setDataInicio] = useState(new Date().toISOString().split("T")[0]);
@@ -70,19 +73,56 @@ export default function RelatoriosPage() {
 
   const totalGeral = vendas.reduce((acc, v) => acc + v.qtd * v.valor_unit, 0);
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Relatórios</h1>
+  const handleLimpar = () => {
+    const hoje = new Date().toISOString().split("T")[0];
+    setDataInicio(hoje);
+    setDataFim(hoje);
+    setVendas([]);
+  };
 
-        {/* Filtros */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Filtros</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  return (
+    <PageLayout role="owner">
+      <PageHeader
+        title="Relatórios"
+        description="Visualize e exporte relatórios de vendas, transferências e comissões"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Relatórios" },
+        ]}
+      />
+
+      {/* Tabs de Relatórios */}
+      <Tabs defaultValue="vendas" className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsTrigger value="vendas" className="gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Vendas
+          </TabsTrigger>
+          <TabsTrigger value="transferencias" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Transferências
+          </TabsTrigger>
+          <TabsTrigger value="comissoes" className="gap-2">
+            <DollarSign className="h-4 w-4" />
+            Comissões
+          </TabsTrigger>
+        </TabsList>
+
+        {/* TAB: Vendas */}
+        <TabsContent value="vendas" className="space-y-6">
+          {/* Filtros */}
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-[#0A66FF]" />
+                Filtros de Período
+              </CardTitle>
+              <CardDescription>
+                Selecione o período para visualizar as vendas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="data-inicio">Data Início</Label>
                   <Input
@@ -104,62 +144,82 @@ export default function RelatoriosPage() {
                 </div>
 
                 <div className="flex items-end">
-                  <Button onClick={handleFiltrar} disabled={loading} className="w-full vendr-btn-primary">
+                  <Button 
+                    onClick={handleFiltrar} 
+                    disabled={loading} 
+                    className="w-full bg-[#0A66FF] hover:bg-[#0052CC]"
+                  >
                     <Filter className="h-4 w-4 mr-2" />
                     {loading ? "Buscando..." : "Filtrar"}
                   </Button>
                 </div>
+
+                <div className="flex items-end">
+                  <Button 
+                    onClick={handleLimpar} 
+                    disabled={loading}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Limpar
+                  </Button>
+                </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Resumo */}
+          {vendas.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="border-l-4 border-l-[#0A66FF]">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground font-medium">Total de Vendas</p>
+                    <p className="text-4xl font-bold text-[#0A66FF] mt-2">{vendas.length}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-[#FF6B00]">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground font-medium">Valor Total</p>
+                    <p className="text-4xl font-bold text-[#FF6B00] mt-2">
+                      {formatCurrency(totalGeral)}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-l-4 border-l-[#22C55E]">
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground font-medium">Ticket Médio</p>
+                    <p className="text-4xl font-bold text-[#22C55E] mt-2">
+                      {formatCurrency(totalGeral / vendas.length)}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+          )}
 
-        {/* Resumo */}
-        {vendas.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Tabela de vendas */}
+          {vendas.length > 0 && (
             <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Total de Vendas</p>
-                  <p className="text-3xl font-bold">{vendas.length}</p>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Vendas Realizadas</CardTitle>
+                    <CardDescription>{vendas.length} vendas no período selecionado</CardDescription>
+                  </div>
+                  <Button onClick={handleExportCSV} variant="outline" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    Exportar CSV
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Valor Total</p>
-                  <p className="text-3xl font-bold text-primary">{formatCurrency(totalGeral)}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Ticket Médio</p>
-                  <p className="text-3xl font-bold text-secondary">
-                    {formatCurrency(totalGeral / vendas.length)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Tabela de vendas */}
-        {vendas.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Vendas ({vendas.length})</CardTitle>
-                <Button onClick={handleExportCSV} variant="outline">
-                  <Download className="h-4 w-4 mr-2" />
-                  Exportar CSV
-                </Button>
-              </div>
-            </CardHeader>
+              </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
@@ -190,20 +250,61 @@ export default function RelatoriosPage() {
                 </TableBody>
               </Table>
             </CardContent>
-          </Card>
-        )}
+            </Card>
+          )}
 
-        {vendas.length === 0 && !loading && (
+          {/* Empty State */}
+          {vendas.length === 0 && !loading && (
+            <Card>
+              <CardContent className="py-16">
+                <div className="text-center">
+                  <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground opacity-50 mb-4" />
+                  <p className="text-lg font-medium text-muted-foreground mb-2">
+                    Nenhuma venda encontrada
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Ajuste os filtros de período e clique em "Filtrar" para buscar vendas
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* TAB: Transferências (Placeholder) */}
+        <TabsContent value="transferencias" className="space-y-6">
           <Card>
-            <CardContent className="py-12">
-              <div className="text-center text-muted-foreground">
-                <p>Nenhuma venda encontrada no período selecionado.</p>
-                <p className="text-sm">Ajuste os filtros e tente novamente.</p>
+            <CardContent className="py-16">
+              <div className="text-center">
+                <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground opacity-50 mb-4" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">
+                  Relatório de Transferências
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Em breve: visualize todas as transferências de estoque entre empresa e vendedores
+                </p>
               </div>
             </CardContent>
           </Card>
-        )}
-      </div>
-    </div>
+        </TabsContent>
+
+        {/* TAB: Comissões (Placeholder) */}
+        <TabsContent value="comissoes" className="space-y-6">
+          <Card>
+            <CardContent className="py-16">
+              <div className="text-center">
+                <DollarSign className="h-16 w-16 mx-auto text-muted-foreground opacity-50 mb-4" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">
+                  Relatório de Comissões
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Em breve: acompanhe comissões pagas e pendentes de todos os vendedores
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </PageLayout>
   );
 }

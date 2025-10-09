@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, PackageSearch, Clock, CheckCircle, XCircle } from "lucide-react";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { PageLayout } from "@/components/layout/PageLayout";
+import { PageHeader } from "@/components/PageHeader";
 import { TransferForm } from "@/components/transferencias/TransferForm";
 import { TransferList } from "@/components/transferencias/TransferList";
 import { useToast } from "@/components/ui/use-toast";
@@ -67,34 +68,28 @@ export default function TransferenciasPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <PackageSearch className="h-8 w-8 text-primary" />
-              Transferências de Estoque
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Envie produtos do seu estoque para vendedores
-            </p>
-          </div>
-          
+    <PageLayout role="owner">
+      <PageHeader
+        title="Transferências de Estoque"
+        description="Envie produtos do seu estoque para vendedores"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Transferências" },
+        ]}
+        actions={
           <Button 
             onClick={() => setShowForm(!showForm)}
             size="lg"
-            className="gap-2"
+            className="gap-2 bg-[#FF6B00] hover:bg-[#E66000] text-white"
           >
             <Plus className="h-5 w-5" />
             Nova Transferência
           </Button>
-        </div>
+        }
+      />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -150,8 +145,8 @@ export default function TransferenciasPage() {
           </Card>
         )}
 
-        {/* Lista de Transferências */}
-        <Card>
+      {/* Lista de Transferências */}
+      <Card>
           <CardHeader>
             <CardTitle>Histórico de Transferências</CardTitle>
             <CardDescription>
@@ -171,7 +166,6 @@ export default function TransferenciasPage() {
             )}
           </CardContent>
         </Card>
-      </div>
-    </div>
+    </PageLayout>
   );
 }
