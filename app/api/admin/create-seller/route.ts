@@ -150,8 +150,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 8) Criar vendedor na tabela vendedores
-    const { data: vendedor, error: vendedorError } = await supabase
+    // 8) Criar vendedor na tabela vendedores (usar supabaseAdmin para bypass RLS)
+    const { data: vendedor, error: vendedorError } = await supabaseAdmin
       .from("vendedores")
       .insert({
         nome: validated.nome,
@@ -178,8 +178,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 9) Criar perfil com role='seller'
-    const { error: perfilVendedorError } = await supabase
+    // 9) Criar perfil com role='seller' (usar supabaseAdmin para bypass RLS)
+    const { error: perfilVendedorError } = await supabaseAdmin
       .from("perfis")
       .insert({
         user_id: authData.user.id,
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
       console.error("Erro ao criar perfil:", perfilVendedorError);
       
       // Rollback
-      await supabase.from("vendedores").delete().eq("id", vendedor.id);
+      await supabaseAdmin.from("vendedores").delete().eq("id", vendedor.id);
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
 
       return NextResponse.json(
