@@ -88,6 +88,7 @@ export function ModernTopBar({
               height={40}
               className="h-10 w-auto"
               priority
+              unoptimized
             />
           ) : (
             // Fallback: Logo padrão se não fornecer imagem

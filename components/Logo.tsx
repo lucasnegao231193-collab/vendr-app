@@ -20,8 +20,8 @@ const sizes = {
 export function Logo({ size = "md", variant = "default", className = "" }: LogoProps) {
   const { width, height } = sizes[size];
   
-  // Usar logo PNG oficial
-  const logoSrc = "/logo-vendr.png";
+  // Usar logo PNG oficial com cache bust
+  const logoSrc = "/logo-vendr.png?v=2";
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
@@ -32,6 +32,7 @@ export function Logo({ size = "md", variant = "default", className = "" }: LogoP
         height={height}
         className="object-contain"
         priority
+        unoptimized
       />
     </div>
   );

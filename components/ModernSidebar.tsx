@@ -155,12 +155,13 @@ export function ModernSidebar({ userRole = "owner", className }: ModernSidebarPr
               className="flex items-center"
             >
               <Image
-                src="/logo-white.png"
+                src="/logo-white.png?v=2"
                 alt="Vendr"
                 width={100}
                 height={32}
                 className="h-8 w-auto"
                 priority
+                unoptimized
               />
             </motion.div>
           )}
