@@ -1,9 +1,11 @@
 /**
  * Página de relatórios com filtros, tabs e exportação CSV
+ * VENDR V2 - Design atualizado com animações
  */
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,13 +20,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Filter, X, BarChart3, TrendingUp, DollarSign } from "lucide-react";
+import { Download, Filter, X, BarChart3, TrendingUp, DollarSign, ArrowLeft, Home } from "lucide-react";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { exportarVendasCSV } from "@/lib/db";
-import { PageLayout } from "@/components/layout/PageLayout";
-import { PageHeader } from "@/components/PageHeader";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { AnimatedCard } from "@/components/ui/animated";
 
 export default function RelatoriosPage() {
+  const router = useRouter();
   const [dataInicio, setDataInicio] = useState(new Date().toISOString().split("T")[0]);
   const [dataFim, setDataFim] = useState(new Date().toISOString().split("T")[0]);
   const [vendas, setVendas] = useState<any[]>([]);
@@ -81,15 +84,41 @@ export default function RelatoriosPage() {
   };
 
   return (
-    <PageLayout role="owner">
-      <PageHeader
-        title="Relatórios"
-        description="Visualize e exporte relatórios de vendas, transferências e comissões"
-        breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Relatórios" },
-        ]}
-      />
+    <AuthenticatedLayout requiredRole="owner">
+      <div className="space-y-6">
+        {/* Header com Navegação */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.back()}
+              className="gap-2"
+              aria-label="Voltar"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard')}
+              className="gap-2"
+              aria-label="Ir para Dashboard"
+            >
+              <Home className="h-4 w-4" />
+              Início
+            </Button>
+          </div>
+        </div>
+
+        {/* Título */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight font-heading">Relatórios</h1>
+          <p className="text-muted-foreground mt-2">
+            Visualize e exporte relatórios de vendas, transferências e comissões
+          </p>
+        </div>
 
       {/* Tabs de Relatórios */}
       <Tabs defaultValue="vendas" className="space-y-6">
@@ -305,6 +334,7 @@ export default function RelatoriosPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </PageLayout>
+      </div>
+    </AuthenticatedLayout>
   );
 }
