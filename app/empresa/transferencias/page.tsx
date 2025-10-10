@@ -3,6 +3,7 @@
  * Empresa envia produtos para vendedores
  * - Formulário de envio
  * - Lista de transferências criadas
+ * VENDR V2 - Design atualizado com animações
  */
 "use client";
 
@@ -10,14 +11,16 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, PackageSearch, Clock, CheckCircle, XCircle } from "lucide-react";
-import { PageLayout } from "@/components/layout/PageLayout";
-import { PageHeader } from "@/components/PageHeader";
+import { Plus, PackageSearch, Clock, CheckCircle, XCircle, ArrowLeft, Home } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { AnimatedCard, AnimatedButton } from "@/components/ui/animated";
 import { TransferForm } from "@/components/transferencias/TransferForm";
 import { TransferList } from "@/components/transferencias/TransferList";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function TransferenciasPage() {
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [transferencias, setTransferencias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,25 +71,49 @@ export default function TransferenciasPage() {
   };
 
   return (
-    <PageLayout role="owner">
-      <PageHeader
-        title="Transferências de Estoque"
-        description="Envie produtos do seu estoque para vendedores"
-        breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Transferências" },
-        ]}
-        actions={
-          <Button 
+    <AuthenticatedLayout requiredRole="owner">
+      <div className="space-y-6">
+        {/* Header com Navegação */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.back()}
+              className="gap-2"
+              aria-label="Voltar"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard')}
+              className="gap-2"
+              aria-label="Ir para Dashboard"
+            >
+              <Home className="h-4 w-4" />
+              Início
+            </Button>
+          </div>
+          <AnimatedButton
             onClick={() => setShowForm(!showForm)}
             size="lg"
-            className="gap-2 bg-[#FF6B00] hover:bg-[#E66000] text-white"
+            className="gap-2 bg-secondary hover:bg-secondary/90 text-white shadow-lg"
           >
             <Plus className="h-5 w-5" />
             Nova Transferência
-          </Button>
-        }
-      />
+          </AnimatedButton>
+        </div>
+
+        {/* Título e Descrição */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Transferências de Estoque</h1>
+          <p className="text-muted-foreground mt-2">
+            Envie produtos do seu estoque para vendedores
+          </p>
+        </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -166,6 +193,7 @@ export default function TransferenciasPage() {
             )}
           </CardContent>
         </Card>
-    </PageLayout>
+      </div>
+    </AuthenticatedLayout>
   );
 }

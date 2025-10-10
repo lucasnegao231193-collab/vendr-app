@@ -69,8 +69,8 @@ export function GlobalTopBar({ userName, avatarUrl, role = 'owner' }: GlobalTopB
 
   return (
     <header 
-      className="sticky top-0 z-50 w-full border-b border-white/10"
-      style={{ backgroundColor: '#0057FF' }}
+      className="sticky top-0 z-50 w-full border-b border-white/10 shadow-md"
+      style={{ backgroundColor: 'hsl(var(--primary))' }}
     >
       <div className="flex h-16 items-center justify-between px-4 md:px-6 max-w-screen-2xl mx-auto">
         {/* Left: Back Button + Logo */}
