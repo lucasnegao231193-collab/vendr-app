@@ -27,7 +27,11 @@ export function AppShell({ children, role, userName }: AppShellProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* TopBar Fixo */}
-        <ModernTopBar userName={userName} notifications={0} />
+        <ModernTopBar 
+          userName={userName} 
+          notifications={0} 
+          logoSrc="/logo-vendr.png"
+        />
 
         {/* Área de Conteúdo com Scroll */}
         <main className="flex-1 overflow-y-auto pt-16 pb-20 lg:pb-0">
