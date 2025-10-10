@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,20 @@ export function ModernTopBar({
   const { theme, setTheme } = useTheme();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+
+  // Cmd+K / Ctrl+K para abrir busca
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowSearch(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleLogout = async () => {
     router.push("/login");
@@ -59,25 +74,36 @@ export function ModernTopBar({
     >
       <div className="h-full flex items-center justify-between px-6 gap-4">
         {/* Logo */}
-        <div className="flex items-center gap-3 shrink-0">
+        <button 
+          onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <div className="h-10 w-10 bg-venlo-orange-500 rounded-venlo flex items-center justify-center">
             <span className="text-white font-bold text-lg">V</span>
           </div>
           <span className="text-white font-bold text-xl hidden sm:inline">
-            Venlo
+            Vendr
           </span>
-        </div>
+        </button>
 
         {/* Busca Global */}
         <div className="flex-1 max-w-xl hidden md:block">
-          <div className="relative">
+          <button
+            onClick={() => setShowSearch(true)}
+            className="w-full relative group"
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Buscar... (Cmd+K)"
-              className="w-full pl-10 bg-trust-blue-800 dark:bg-trust-blue-600 border-trust-blue-700 dark:border-trust-blue-500 text-white placeholder:text-gray-400 focus:ring-venlo-orange-500"
-            />
-          </div>
+            <div className="w-full pl-10 pr-20 py-2 rounded-lg bg-trust-blue-800 dark:bg-trust-blue-600 border border-trust-blue-700 dark:border-trust-blue-500 text-left text-gray-400 text-sm group-hover:border-venlo-orange-500 transition-colors">
+              Buscar...
+            </div>
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-trust-blue-700 dark:bg-trust-blue-500 rounded text-xs text-gray-300 border border-trust-blue-600">
+              ⌘K
+            </kbd>
+          </button>
         </div>
+
+        {/* Dialog de Busca */}
+        <GlobalSearch open={showSearch} onOpenChange={setShowSearch} />
 
         {/* Ações Direita */}
         <div className="flex items-center gap-2">

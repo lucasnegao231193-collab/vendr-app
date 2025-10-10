@@ -157,7 +157,7 @@ export default function EstoquePage() {
               Gerencie seu inventário e movimentações
             </p>
           </div>
-          <Button className="bg-[var(--brand-primary)] text-white gap-2">
+          <Button className="bg-[#0D1B2A] hover:bg-[#1a2938] text-white gap-2 shadow-md">
             <Plus className="h-4 w-4" />
             Adicionar Produto
           </Button>
