@@ -24,7 +24,6 @@ import { Download, Filter, X, BarChart3, TrendingUp, DollarSign, ArrowLeft, Home
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { exportarVendasCSV } from "@/lib/db";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
-import { AnimatedCard } from "@/components/ui/animated";
 
 export default function RelatoriosPage() {
   const router = useRouter();
