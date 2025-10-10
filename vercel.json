@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "regions": ["gru1"],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "NEXT_PUBLIC_VENDR_PIX_KEY": "@vendr_pix_key",
+    "NEXT_PUBLIC_TZ": "America/Sao_Paulo",
+    "NEXT_PUBLIC_APP_NAME": "Vendr",
+    "NEXT_PUBLIC_SUPPORT_WHATSAPP": "@support_whatsapp",
+    "NEXT_PUBLIC_SUPPORT_MESSAGE_OWNER": "Olá! Sou empresa e preciso de ajuda no Vendr.",
+    "NEXT_PUBLIC_SUPPORT_MESSAGE_SELLER": "Olá! Sou vendedor e preciso de ajuda no Vendr."
+  }
+}
