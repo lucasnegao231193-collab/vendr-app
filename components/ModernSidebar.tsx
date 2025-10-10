@@ -8,6 +8,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Users,
@@ -151,14 +152,16 @@ export function ModernSidebar({ userRole = "owner", className }: ModernSidebarPr
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="flex items-center gap-2"
+              className="flex items-center"
             >
-              <div className="h-8 w-8 bg-venlo-orange-500 rounded-venlo flex items-center justify-center">
-                <span className="text-white font-bold text-sm">V</span>
-              </div>
-              <span className="font-bold text-trust-blue-900 dark:text-white">
-                Venlo
-              </span>
+              <Image
+                src="/logo-white.svg"
+                alt="Vendr"
+                width={100}
+                height={32}
+                className="h-8 w-auto"
+                priority
+              />
             </motion.div>
           )}
         </AnimatePresence>
