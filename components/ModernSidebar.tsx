@@ -155,7 +155,7 @@ export function ModernSidebar({ userRole = "owner", className }: ModernSidebarPr
               className="flex items-center"
             >
               <Image
-                src="/logo-white.svg"
+                src="/logo-white.png"
                 alt="Vendr"
                 width={100}
                 height={32}
