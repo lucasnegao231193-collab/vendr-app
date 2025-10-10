@@ -1,14 +1,13 @@
 /**
- * AppShell Component
- * Shell principal do app com GlobalTopBar (azul #0057FF), SideNav, BottomNav e conteúdo
+ * AppShell Component - MODERNIZADO
+ * Shell principal com Trust Blue Design System
+ * ModernTopBar + ModernSidebar
  */
 "use client";
 
-import { GlobalTopBar } from "../GlobalTopBar";
-import { SideNav } from "./SideNav";
+import { ModernTopBar } from "../ModernTopBar";
+import { ModernSidebar } from "../ModernSidebar";
 import { BottomNav } from "./BottomNav";
-import { Breadcrumbs } from "./Breadcrumbs";
-import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { UserRole } from "@/lib/navigation";
 
 interface AppShellProps {
@@ -19,28 +18,29 @@ interface AppShellProps {
 
 export function AppShell({ children, role, userName }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-[var(--bg-soft)]">
-      {/* TopBar fixo azul */}
-      <GlobalTopBar role={role} userName={userName} />
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-trust-blue-900">
+      {/* Sidebar - Desktop only */}
+      <div className="hidden lg:block">
+        <ModernSidebar userRole={role} />
+      </div>
 
-      <div className="flex">
-        {/* SideNav (desktop only) */}
-        <SideNav role={role} />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* TopBar Fixo */}
+        <ModernTopBar userName={userName} notifications={0} />
 
-        {/* Main Content */}
-        <main className="flex-1 pb-20 lg:pb-8">
+        {/* Área de Conteúdo com Scroll */}
+        <main className="flex-1 overflow-y-auto pt-16 pb-20 lg:pb-0">
           <div className="container mx-auto p-4 md:p-6 lg:p-8">
-            <Breadcrumbs />
             {children}
           </div>
         </main>
       </div>
 
-      {/* BottomNav (mobile only) */}
-      <BottomNav role={role} />
-
-      {/* Floating WhatsApp */}
-      <FloatingWhatsApp role={role} />
+      {/* BottomNav - Mobile only */}
+      <div className="lg:hidden">
+        <BottomNav role={role} />
+      </div>
     </div>
   );
 }

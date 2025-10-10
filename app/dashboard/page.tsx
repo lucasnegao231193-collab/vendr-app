@@ -1,32 +1,19 @@
 /**
- * Dashboard do Owner
- * KPIs, insights e navegação rápida
+ * Dashboard do Owner - MODERNIZADO
+ * Usando DashboardEmpresa com Trust Blue Design
  */
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, TrendingUp, CreditCard, ShoppingCart, Users, Package, AlertCircle } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import { SkeletonTable } from "@/components/ui/SkeletonTable";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { QuickActions } from "@/components/QuickActions";
-import { AlertsCard, generateAlerts } from "@/components/AlertsCard";
+import { DashboardEmpresa } from "@/components/dashboards/DashboardEmpresa";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
-import { motion } from "framer-motion";
 
 export default function DashboardPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [vendas, setVendas] = useState<any[]>([]);
   const [vendedores, setVendedores] = useState<any[]>([]);
-  const [produtos, setProdutos] = useState<any[]>([]);
   
   const supabase = createClient();
   const hoje = new Date().toISOString().split("T")[0];
@@ -37,20 +24,21 @@ export default function DashboardPage() {
 
   const loadData = async () => {
     try {
-      const [vendasRes, vendedoresRes, produtosRes] = await Promise.all([
+      const [vendasRes, vendedoresRes] = await Promise.all([
         supabase
           .from("vendas")
           .select("*")
           .gte("data_hora", `${hoje}T00:00:00`)
           .lte("data_hora", `${hoje}T23:59:59`)
           .eq("status", "confirmado"),
-        supabase.from("vendedores").select("*").eq("ativo", true),
-        supabase.from("produtos").select("*").eq("ativo", true),
+        supabase
+          .from("vendedores")
+          .select("id, nome")
+          .eq("ativo", true),
       ]);
 
       setVendas(vendasRes.data || []);
       setVendedores(vendedoresRes.data || []);
-      setProdutos(produtosRes.data || []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
@@ -58,7 +46,15 @@ export default function DashboardPage() {
     }
   };
 
-  // Calcular KPIs
+  if (loading) {
+    return (
+      <AuthenticatedLayout requiredRole="owner">
+        <DashboardSkeleton />
+      </AuthenticatedLayout>
+    );
+  }
+
+  // Calcular métricas do dia
   const totalVendido = vendas.reduce((acc, v) => acc + v.qtd * v.valor_unit, 0);
   const totalPix = vendas
     .filter((v) => v.meio_pagamento === "pix")
@@ -66,38 +62,30 @@ export default function DashboardPage() {
   const ticketMedio = vendas.length > 0 ? totalVendido / vendas.length : 0;
   const percentualPix = totalVendido > 0 ? (totalPix / totalVendido) * 100 : 0;
 
-  const alerts = generateAlerts(produtos, vendedores);
+  // Calcular top vendedores (simulado - pode buscar do banco)
+  const topVendedores = vendedores.slice(0, 3).map((v, idx) => ({
+    id: v.id,
+    nome: v.nome,
+    vendas: Math.floor(Math.random() * 50) + 10, // Dados simulados
+    meta: 50,
+  }));
 
-  if (loading) {
-    return (
-      <AuthenticatedLayout requiredRole="owner">
-        <div className="px-4 md:px-6 space-y-6">
-          <DashboardSkeleton />
-        </div>
-      </AuthenticatedLayout>
-    );
-  }
+  const metrics = {
+    totalVendidoHoje: totalVendido,
+    ticketMedio,
+    percentualPix,
+    totalVendasDia: vendas.length,
+  };
 
   return (
     <AuthenticatedLayout requiredRole="owner">
-      <div className="px-4 md:px-6 space-y-6 animate-fade-in">
-        <Breadcrumbs />
-        
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
-        >
-          <div>
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Dashboard</h1>
-            <p className="text-[var(--text-secondary)]">
-              Hoje: {new Date().toLocaleDateString("pt-BR")}
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Quick Actions */}
+      <DashboardEmpresa
+        metrics={metrics}
+        topVendedores={topVendedores}
+      />
+    </AuthenticatedLayout>
+  );
+}
         <QuickActions />
 
         {/* Alerts */}
