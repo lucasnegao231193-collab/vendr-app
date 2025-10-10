@@ -15,7 +15,6 @@ import { DollarSign, TrendingUp, CreditCard, ShoppingCart, Users, Package, Alert
 import { formatCurrency } from "@/lib/utils";
 import { SkeletonTable } from "@/components/ui/SkeletonTable";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ModernTopBar } from "@/components/ModernTopBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { QuickActions } from "@/components/QuickActions";
 import { AlertsCard, generateAlerts } from "@/components/AlertsCard";
@@ -72,8 +71,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <AuthenticatedLayout requiredRole="owner">
-        <ModernTopBar userName="Admin" />
-        <div className="pt-20 px-4 md:px-6">
+        <div className="px-4 md:px-6 space-y-6">
           <DashboardSkeleton />
         </div>
       </AuthenticatedLayout>
@@ -82,8 +80,7 @@ export default function DashboardPage() {
 
   return (
     <AuthenticatedLayout requiredRole="owner">
-      <ModernTopBar userName="Admin" />
-      <div className="pt-20 px-4 md:px-6 space-y-6 animate-fade-in">
+      <div className="px-4 md:px-6 space-y-6 animate-fade-in">
         <Breadcrumbs />
         
         {/* Header */}
