@@ -13,6 +13,7 @@ import {
   Wallet,
   MoreHorizontal,
   Plus,
+  ArrowLeftRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserRole } from "@/lib/navigation";
@@ -28,13 +29,14 @@ export function BottomNav({ role }: BottomNavProps) {
     { label: "Home", href: "/dashboard", icon: LayoutDashboard },
     { label: "Vendedores", href: "/vendedores", icon: Users },
     { label: "Estoque", href: "/estoque", icon: Package },
-    { label: "Financeiro", href: "/financeiro", icon: Wallet },
+    { label: "Transfer.", href: "/empresa/transferencias", icon: ArrowLeftRight },
     { label: "Mais", href: "/configuracoes", icon: MoreHorizontal },
   ];
 
   const sellerItems = [
     { label: "Home", href: "/vendedor", icon: LayoutDashboard },
-    { label: "Vendas", href: "/vendedor/venda", icon: Package },
+    { label: "Estoque", href: "/vendedor/estoque", icon: Package },
+    { label: "Transfer.", href: "/vendedor/transferencias-recebidas", icon: ArrowLeftRight },
     { label: "Fechar", href: "/vendedor/fechar", icon: Wallet },
     { label: "Mais", href: "/configuracoes", icon: MoreHorizontal },
   ];

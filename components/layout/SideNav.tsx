@@ -15,6 +15,8 @@ import {
   BarChart3,
   Settings,
   LifeBuoy,
+  ArrowLeftRight,
+  PackageOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserRole } from "@/lib/navigation";
@@ -52,6 +54,8 @@ export function SideNav({ role }: SideNavProps) {
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Vendedores", href: "/vendedores", icon: Users },
     { label: "Estoque", href: "/estoque", icon: Package },
+    { label: "Transferências", href: "/empresa/transferencias", icon: ArrowLeftRight },
+    { label: "Devoluções", href: "/empresa/devolucoes", icon: PackageOpen },
     { label: "Operações", href: "/operacoes", icon: Receipt },
     { label: "Financeiro", href: "/financeiro", icon: Wallet },
     { label: "Relatórios", href: "/relatorios", icon: BarChart3 },
@@ -62,6 +66,8 @@ export function SideNav({ role }: SideNavProps) {
   const sellerItems: NavItem[] = [
     { label: "Início", href: "/vendedor", icon: LayoutDashboard },
     { label: "Nova Venda", href: "/vendedor/venda", icon: Receipt },
+    { label: "Meu Estoque", href: "/vendedor/estoque", icon: Package },
+    { label: "Transferências", href: "/vendedor/transferencias-recebidas", icon: ArrowLeftRight },
     { label: "Fechar Dia", href: "/vendedor/fechar", icon: Wallet },
     { label: "Suporte", icon: LifeBuoy, action: handleSupport },
   ];
