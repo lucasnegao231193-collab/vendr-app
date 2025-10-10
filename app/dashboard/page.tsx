@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Dashboard do Owner - MODERNIZADO
  * Usando DashboardEmpresa com Trust Blue Design
  */
@@ -28,8 +28,8 @@ export default function DashboardPage() {
         supabase
           .from("vendas")
           .select("*")
-          .gte("data_hora", ${hoje}T00:00:00)
-          .lte("data_hora", ${hoje}T23:59:59)
+          .gte("data_hora", `${hoje}T00:00:00`)
+          .lte("data_hora", `${hoje}T23:59:59`)
           .eq("status", "confirmado"),
         supabase
           .from("vendedores")
