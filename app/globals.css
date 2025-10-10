@@ -4,90 +4,123 @@
 
 @layer base {
   :root {
-    /* Vendr Design System V2 - Cores mais vibrantes */
-    --color-primary: #0A66FF;
-    --color-primary-foreground: #FFFFFF;
-    --color-secondary: #FF6B00;
-    --color-accent: #22C55E;
-    --color-warning: #F59E0B;
-    --color-danger: #EF4444;
-    --color-bg: #F5F7FB;
-    --color-card: #FFFFFF;
-    --color-muted: #6B7280;
+    /* ============================================
+       VENLO DESIGN SYSTEM - TRUST BLUE
+       ============================================ */
     
-    /* shadcn/ui tokens - Atualizado com cores vibrantes */
-    --background: 245 245 251; /* #F5F7FB */
-    --foreground: 15 23 42;    /* #0F172A */
+    /* Cores Primárias Trust Blue */
+    --trust-blue-50: #f8fafc;
+    --trust-blue-100: #f1f5f9;
+    --trust-blue-200: #e2e8f0;
+    --trust-blue-500: #415A77;
+    --trust-blue-700: #1B263B;
+    --trust-blue-900: #0D1B2A;
+    
+    /* Cores Secundárias Venlo Orange */
+    --venlo-orange-100: #FFE6D5;
+    --venlo-orange-500: #FF6600;
+    --venlo-orange-600: #cc5200;
+    
+    /* Sistema Semântico */
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --info: #3B82F6;
+    
+    /* Tema Light */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F4F4F4;
+    --bg-tertiary: #f8fafc;
+    --text-primary: #0D1B2A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
+    --border-color: #E2E8F0;
+    
+    /* Shadcn UI Tokens */
+    --background: 0 0% 100%;        /* #FFFFFF */
+    --foreground: 210 40% 8%;       /* #0D1B2A */
     
     --card: 0 0% 100%;
-    --card-foreground: 15 23 42;
+    --card-foreground: 210 40% 8%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 15 23 42;
+    --popover-foreground: 210 40% 8%;
     
-    --primary: 215 100% 52%;      /* #0A66FF */
+    --primary: 210 40% 8%;          /* Trust Blue 900 */
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 20 100% 50%;     /* #FF6B00 */
+    --secondary: 20 100% 50%;       /* Venlo Orange */
     --secondary-foreground: 0 0% 100%;
     
-    --muted: 218 18% 93%;
-    --muted-foreground: 218 12% 45%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
     
-    --accent: 142 71% 45%;        /* #22C55E */
-    --accent-foreground: 0 0% 100%;
+    --accent: 20 100% 92%;          /* Orange Light */
+    --accent-foreground: 210 40% 8%;
     
-    --destructive: 0 91% 59%;     /* #EF4444 */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 218 18% 90%;
-    --input: 218 18% 90%;
-    --ring: 215 100% 52%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 20 100% 50%;
     
     --radius: 0.75rem;
     
-    --chart-1: 215 100% 52%;      /* Primary */
-    
-    --chart-2: 173 58% 39%;
-    
-    --chart-3: 197 37% 24%;
-    
-    
-    --chart-5: 27 87% 67%;
+    /* Charts */
+    --chart-1: 210 40% 8%;   /* Trust Blue */
+    --chart-2: 20 100% 50%;  /* Orange */
+    --chart-3: 142 71% 45%;  /* Success */
+    --chart-4: 217 91% 60%;  /* Info */
+    --chart-5: 38 92% 50%;   /* Warning */
   }
 
+  [data-theme="dark"],
   .dark {
-    --brand-primary: #3B82F6;
-    --brand-accent: #FB923C;
-    --bg-soft: #1F2937;
-    --text-primary: #F9FAFB;
-    --text-secondary: #D1D5DB;
-    --border-soft: #374151;
+    /* Tema Dark */
+    --bg-primary: #0D1B2A;
+    --bg-secondary: #1B263B;
+    --bg-tertiary: #12192a;
+    --text-primary: #FFFFFF;
+    --text-secondary: #E2E8F0;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
     
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Shadcn UI Dark */
+    --background: 210 40% 8%;       /* #0D1B2A */
+    --foreground: 0 0% 100%;
+    
+    --card: 210 30% 12%;            /* #1B263B */
+    --card-foreground: 0 0% 100%;
+    
+    --popover: 210 30% 12%;
+    --popover-foreground: 0 0% 100%;
+    
+    --primary: 0 0% 100%;
+    --primary-foreground: 210 40% 8%;
+    
+    --secondary: 20 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 20 100% 92%;
+    --accent-foreground: 210 40% 8%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 20 100% 50%;
+    
+    /* Charts Dark */
+    --chart-1: 217 91% 60%;
+    --chart-2: 20 100% 60%;
+    --chart-3: 142 71% 55%;
+    --chart-4: 217 91% 70%;
+    --chart-5: 38 92% 60%;
   }
 }
 
