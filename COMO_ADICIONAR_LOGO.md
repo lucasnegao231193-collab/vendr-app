@@ -156,19 +156,10 @@ public/
 ## 🔥 **ATALHO RÁPIDO:**
 
 Se você quiser fazer o **MÍNIMO** agora e melhorar depois:
-
-1. **Substitua apenas o favicon.ico** (círculo laranja)
-2. **Salve o logo completo como `logo.svg`** na pasta `public/`
-3. **Commit e push:**
 ```bash
 git add public/
 git commit -m "feat: adicionar novo logo e favicon Venlo"
 git push origin main
-```
-
-4. **Teste local:**
-```bash
-npm run dev
 # Acesse http://localhost:3000
 # Recarregue com Ctrl+Shift+R
 ```

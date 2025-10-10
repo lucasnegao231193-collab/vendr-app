@@ -162,13 +162,16 @@ export default function EstoquePage() {
     if (!confirm) return;
 
     try {
-      // Deletar do estoque
-      const { error: estoqueError } = await supabase
-        .from("estoques")
-        .delete()
-        .eq("id", item.id);
+      // Chamar API para deletar (usa service_role para bypass RLS)
+      const response = await fetch(`/api/admin/delete-product?id=${item.id}`, {
+        method: 'DELETE',
+      });
 
-      if (estoqueError) throw estoqueError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao deletar produto');
+      }
 
       toast({
         title: "Produto removido!",
