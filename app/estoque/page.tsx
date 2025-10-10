@@ -12,6 +12,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { EditProductDialog } from "@/components/EditProductDialog";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -27,7 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Package, Plus, ArrowUpDown, Download, Edit } from "lucide-react";
+import { Package, Plus, ArrowUpDown, Download, Edit, MoreVertical, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface EstoqueItem {
@@ -35,6 +45,7 @@ interface EstoqueItem {
   produto_id: string;
   qtd: number;
   produtos: {
+    id: string;
     nome: string;
     marca: string | null;
     preco: number;
@@ -50,8 +61,11 @@ export default function EstoquePage() {
   const [busca, setBusca] = useState("");
   const [filtroMarca, setFiltroMarca] = useState("todas");
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "ativo" | "inativo">("todos");
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const supabase = createClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     loadEstoque();
@@ -70,6 +84,7 @@ export default function EstoquePage() {
           produto_id,
           qtd,
           produtos (
+            id,
             nome,
             marca,
             preco,
@@ -125,6 +140,51 @@ export default function EstoquePage() {
   const marcas = Array.from(
     new Set(estoque.map((item) => item.produtos.marca).filter(Boolean))
   );
+
+  const handleEdit = (item: EstoqueItem) => {
+    setEditingProduct({
+      id: item.id,
+      produto_id: item.produtos.id,
+      nome: item.produtos.nome,
+      marca: item.produtos.marca,
+      preco: item.produtos.preco,
+      qtd: item.qtd,
+      ativo: item.produtos.ativo,
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleDelete = async (item: EstoqueItem) => {
+    const confirm = window.confirm(
+      `Tem certeza que deseja excluir "${item.produtos.nome}"?\n\nIsso removerá o produto do estoque. Esta ação não pode ser desfeita.`
+    );
+
+    if (!confirm) return;
+
+    try {
+      // Deletar do estoque
+      const { error: estoqueError } = await supabase
+        .from("estoques")
+        .delete()
+        .eq("id", item.id);
+
+      if (estoqueError) throw estoqueError;
+
+      toast({
+        title: "Produto removido!",
+        description: "O item foi excluído do estoque",
+      });
+
+      loadEstoque();
+    } catch (error: any) {
+      console.error("Erro ao deletar:", error);
+      toast({
+        title: "Erro ao excluir",
+        description: error.message || "Tente novamente",
+        variant: "destructive",
+      });
+    }
+  };
 
   const exportCSV = () => {
     const headers = ["Produto", "Marca", "Preço", "Qtd", "Unidade", "Valor Total"];
@@ -295,9 +355,28 @@ export default function EstoquePage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleEdit(item)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(item)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))
@@ -306,6 +385,17 @@ export default function EstoquePage() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Dialog de Edição */}
+        <EditProductDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          produto={editingProduct}
+          onSuccess={() => {
+            loadEstoque();
+            setShowEditDialog(false);
+          }}
+        />
       </div>
     </AuthenticatedLayout>
   );

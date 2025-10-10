@@ -28,12 +28,14 @@ interface ModernTopBarProps {
   userName?: string;
   userAvatar?: string;
   notifications?: number;
+  logoSrc?: string; // Caminho para logo personalizado (ex: /logo.png)
 }
 
 export function ModernTopBar({
   userName = "Usuário",
   userAvatar,
   notifications = 0,
+  logoSrc,
 }: ModernTopBarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -76,14 +78,28 @@ export function ModernTopBar({
         {/* Logo */}
         <button 
           onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
+          className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <div className="h-10 w-10 bg-venlo-orange-500 rounded-venlo flex items-center justify-center">
-            <span className="text-white font-bold text-lg">V</span>
-          </div>
-          <span className="text-white font-bold text-xl hidden sm:inline">
-            Vendr
-          </span>
+          {logoSrc ? (
+            <Image
+              src={logoSrc}
+              alt="Vendr Logo"
+              width={120}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
+          ) : (
+            // Fallback: Logo padrão se não fornecer imagem
+            <>
+              <div className="h-10 w-10 bg-venlo-orange-500 rounded-venlo flex items-center justify-center">
+                <span className="text-white font-bold text-lg">V</span>
+              </div>
+              <span className="text-white font-bold text-xl hidden sm:inline">
+                Vendr
+              </span>
+            </>
+          )}
         </button>
 
         {/* Busca Global */}
