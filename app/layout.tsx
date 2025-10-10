@@ -21,7 +21,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Vendr - Gestão de Vendas Externas",
+  title: "Venlo - Gestão de Vendas Externas",
   description: "Sistema completo para gestão de vendas ambulantes",
   manifest: "/manifest.json",
 };

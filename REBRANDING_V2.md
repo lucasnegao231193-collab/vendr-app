@@ -32,7 +32,6 @@ Criados em `components/ui/animated/`:
 **Uso:**
 ```tsx
 import { AnimatedCard, AnimatedButton } from "@/components/ui/animated";
-
 <AnimatedCard delay={0.1}>
   <CardContent>...</CardContent>
 </AnimatedCard>
@@ -40,29 +39,10 @@ import { AnimatedCard, AnimatedButton } from "@/components/ui/animated";
 <AnimatedButton onClick={handleClick}>
   Criar Vendedor
 </AnimatedButton>
-```
 
 ### 3. **Página Transferências Melhorada**
 `app/empresa/transferencias/page.tsx`
-
-✅ Header com botões **Voltar** e **Início**  
-✅ Botão CTA laranja (secondary color)  
-✅ Layout consistente com AuthenticatedLayout  
-✅ TopBar azul automático
-
----
-
-## 🔄 **EM ANDAMENTO**
-
-### 4. **Navegação Consistente**
-- ✅ Transferências no menu lateral (SideNav)
-- ✅ Transferências no menu inferior (BottomNav)
-- ⏳ Falta aplicar em Relatórios
-
----
-
-## ⏳ **PENDENTE (Fase 2)**
-
+{{ ... }}
 ### 5. **Página Relatórios**
 `app/relatorios/page.tsx`
 
@@ -74,28 +54,7 @@ import { AnimatedCard, AnimatedButton } from "@/components/ui/animated";
 
 ### 6. **Tipografia (Fontes)**
 **Necessário:**
-- [ ] Carregar **Outfit** (700/600) para títulos
-- [ ] Carregar **Inter** (400/500) para UI
-- [ ] Atualizar `app/layout.tsx` com imports
-
-**Como fazer:**
-```tsx
-// app/layout.tsx
-import { Outfit, Inter } from "next/font/google";
-
-const outfit = Outfit({ 
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-outfit"
-});
-
-const inter = Inter({ 
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-inter"
-});
-```
-
+{{ ... }}
 ### 7. **Dashboard com Animações**
 **Necessário:**
 - [ ] Aplicar `AnimatedCard` nos KPIs com stagger (60ms)
@@ -108,28 +67,7 @@ const inter = Inter({
 A API `/api/admin/create-seller` já estava correta. A página `/vendedores` foi atualizada para usá-la.
 
 ---
-
-## 📋 **CHECKLIST COMPLETO**
-
-### **Design & Cores**
-- [x] Tokens de cores vibrantes
-- [x] TopBar azul (#0A66FF)
-- [x] Botões CTA laranja (#FF6B00)
-- [ ] Fontes Outfit + Inter
-- [ ] Cards com sombra leve
-- [ ] Badges coloridos por status
-
-### **Animações**
-- [x] Componentes AnimatedCard/Button
-- [ ] Dashboard KPIs com stagger
-- [ ] Hover em rows de tabelas
-- [ ] Respeitarprefers-reduced-motion
-
-### **Navegação**
-- [x] Transferências no menu
-- [x] Header Voltar/Início em Transferências
-- [ ] Header Voltar/Início em Relatórios
-- [x] TopBar em todas páginas (via AuthenticatedLayout)
+{{ ... }}
 
 ### **Páginas**
 - [x] Transferências - Melhorada
@@ -141,83 +79,7 @@ A API `/api/admin/create-seller` já estava correta. A página `/vendedores` foi
 ### **QA**
 - [ ] Testes E2E com Playwright
 - [ ] Verificar acessibilidade (focus visível)
-- [ ] Testar dark mode
-- [ ] Validar em mobile
-
----
-
-## 🚀 **PRÓXIMOS PASSOS**
-
-### **Imediato (Sessão Atual):**
-1. ✅ Commit rebranding V2 parcial
-2. Criar página Relatórios completa
-3. Adicionar fontes Outfit + Inter
-
-### **Curto Prazo:**
-4. Aplicar AnimatedCard no Dashboard
-5. Melhorar badges de status
-6. Adicionar empty states com ilustrações
-
-### **Médio Prazo:**
-7. Testes automatizados
-8. Documentação de componentes
-9. Storybook para design system
-
----
-
-## 📝 **COMO USAR O NOVO DESIGN**
-
-### **Cores**
-```tsx
-// Botão primário (azul)
-<Button className="bg-primary hover:bg-primary/90">
-  Ação Principal
-</Button>
-
-// Botão CTA (laranja)
-<Button className="bg-secondary hover:bg-secondary/90">
-  Criar Novo
-</Button>
-
-// Badge sucesso
-<Badge className="bg-accent/10 text-accent">Ativo</Badge>
-
-// Badge aviso
-<Badge className="bg-warning/10 text-warning">Pendente</Badge>
-```
-
-### **Animações**
-```tsx
-// Card com animação
-<AnimatedCard delay={0.1}>
-  <CardHeader>...</CardHeader>
-</AnimatedCard>
-
-// Lista com stagger
-{items.map((item, i) => (
-  <AnimatedCard key={item.id} delay={i * 0.06}>
-    ...
-  </AnimatedCard>
-))}
-
-// Botão animado
-<AnimatedButton variant="default">
-  Salvar
-</AnimatedButton>
-```
-
-### **Desativar Animações**
-Respeita automaticamente `prefers-reduced-motion`:
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
-
+{{ ... }}
 ---
 
 ## 🐛 **BUGS CONHECIDOS**
@@ -229,7 +91,7 @@ Respeita automaticamente `prefers-reduced-motion`:
 
 ### **Pendentes:**
 - Nenhum bug crítico identificado
-
+{{ ... }}
 ---
 
 ## 📦 **DEPENDÊNCIAS**

@@ -132,108 +132,29 @@ import { AnimatedCard } from "@/components/ui/animated";
 Botão com hover elevado e tap scale.
 
 ```tsx
-import { AnimatedButton } from "@/components/ui/animated";
 
 <AnimatedButton 
   onClick={handleClick}
   className="bg-secondary hover:bg-secondary/90"
 >
-  Criar Vendedor
+  Criar Venloedor
 </AnimatedButton>
-```
 
 ### **TabsIndicator**
 Indicador animado para Tabs (em desenvolvimento).
-
-```tsx
-import { TabsIndicator } from "@/components/ui/animated";
-
-<div className="relative">
-  <div className="flex gap-4">
-    {tabs.map((tab, i) => (
-      <button key={tab} onClick={() => setActive(i)}>
-        {tab}
-      </button>
-    ))}
-  </div>
-  <TabsIndicator activeIndex={active} tabs={tabs.length} />
-</div>
-```
-
----
-
-## 🧩 **PADRÕES DE LAYOUT**
-
-### **Página com Header e Navegação**
-```tsx
-import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-export default function MinhaPage() {
-  const router = useRouter();
-
-  return (
-    <AuthenticatedLayout requiredRole="owner">
-      <div className="space-y-6">
-        {/* Header com Navegação */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.back()}
-              aria-label="Voltar"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/dashboard')}
-              aria-label="Ir para Dashboard"
-            >
-              <Home className="h-4 w-4" />
-              Início
-            </Button>
-          </div>
-        </div>
-
-        {/* Título */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Título da Página
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Descrição da página
-          </p>
-        </div>
-
-        {/* Conteúdo */}
-        <Card className="shadow-md">
-          <CardContent>...</CardContent>
-        </Card>
-      </div>
-    </AuthenticatedLayout>
-  );
-}
-```
-
-### **Cards de Estatísticas**
-```tsx
+{{ ... }}
 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
   <Card className="border-l-4 border-l-primary">
     <CardContent className="pt-6">
       <div className="text-center">
         <p className="text-sm text-muted-foreground font-medium">
-          Total de Vendas
+          Total de Venloas
         </p>
         <p className="text-4xl font-bold text-primary mt-2">
           {vendas.length}
         </p>
       </div>
+{{ ... }}
     </CardContent>
   </Card>
 

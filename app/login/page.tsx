@@ -68,7 +68,7 @@ export default function LoginPage() {
       if (perfil.role === "owner") {
         if (empresa?.is_solo) {
           toast({
-            title: "Bem-vindo ao Vendr Solo!",
+            title: "Bem-vindo ao Venlo Solo!",
             description: "Acesso ao seu painel autônomo",
           });
           router.push("/solo");

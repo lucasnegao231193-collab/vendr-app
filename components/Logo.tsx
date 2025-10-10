@@ -27,7 +27,7 @@ export function Logo({ size = "md", variant = "default", className = "" }: LogoP
   return (
     <Image
       src={logoSrc}
-      alt="Vendr"
+      alt="Venlo"
       width={width}
       height={height}
       className={`${filterClass} ${className}`}

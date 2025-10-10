@@ -1,4 +1,4 @@
-# 🛒 Vendr - Sistema de Gestão de Vendas Externas
+# 🛒 Venlo - Sistema de Gestão de Vendas Externas
 
 Sistema completo para gestão de vendas ambulantes e externas, com suporte offline, dashboard em tempo real e PWA.
 
@@ -118,7 +118,7 @@ empresas
 
 ## 🌐 PWA (Progressive Web App)
 
-O Vendr é instalável como aplicativo:
+O Venlo é instalável como aplicativo:
 
 ### No Android/iOS:
 1. Acesse pelo navegador
