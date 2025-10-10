@@ -11,31 +11,28 @@ interface LogoProps {
 }
 
 const sizes = {
-  sm: { width: 120, height: 32 },
-  md: { width: 180, height: 48 },
-  lg: { width: 240, height: 64 },
-  xl: { width: 300, height: 80 },
+  sm: { width: 120, height: 40 },
+  md: { width: 160, height: 53 },
+  lg: { width: 200, height: 66 },
+  xl: { width: 240, height: 80 },
 };
 
 export function Logo({ size = "md", variant = "default", className = "" }: LogoProps) {
   const { width, height } = sizes[size];
   
-  // Se for white variant, usar filtro CSS ou logo alternativa
-  const logoSrc = variant === "white" ? "/logo-white.svg" : "/logo.svg";
-  const filterClass = variant === "white" ? "brightness-0 invert" : "";
+  // Usar logo PNG oficial
+  const logoSrc = "/logo-vendr.png";
 
   return (
-    <Image
-      src={logoSrc}
-      alt="Venlo"
-      width={width}
-      height={height}
-      className={`${filterClass} ${className}`}
-      priority
-      onError={(e) => {
-        // Fallback para texto se imagem não existir
-        e.currentTarget.style.display = 'none';
-      }}
-    />
+    <div className={`flex items-center justify-center ${className}`}>
+      <Image
+        src={logoSrc}
+        alt="Vendr"
+        width={width}
+        height={height}
+        className="object-contain"
+        priority
+      />
+    </div>
   );
 }
