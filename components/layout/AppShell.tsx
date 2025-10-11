@@ -30,7 +30,7 @@ export function AppShell({ children, role, userName }: AppShellProps) {
         <ModernTopBar 
           userName={userName} 
           notifications={0} 
-          logoSrc="/logo-white.png?v=2"
+          logoSrc="/vendr-white-v3.png"
         />
 
         {/* Área de Conteúdo com Scroll */}

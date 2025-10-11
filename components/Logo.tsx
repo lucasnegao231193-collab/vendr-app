@@ -20,8 +20,8 @@ const sizes = {
 export function Logo({ size = "md", variant = "default", className = "" }: LogoProps) {
   const { width, height } = sizes[size];
   
-  // Usar logo PNG oficial com cache bust
-  const logoSrc = "/logo-vendr.png?v=2";
+  // Usar logo PNG oficial - novo nome para quebrar cache
+  const logoSrc = "/vendr-logo-v3.png";
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
