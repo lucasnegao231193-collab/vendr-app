@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 6. Buscar perfil do usuário (vendedor)
+    // 6. Verificar se perfil existe
     const { data: perfil } = await supabase
       .from('perfis')
-      .select('id')
+      .select('user_id')
       .eq('user_id', user.id)
       .single();
     
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         .from('vendas')
         .insert({
           empresa_id: empresaId,
-          vendedor_id: perfil.id, // ID do perfil do vendedor
+          vendedor_id: user.id, // user_id do perfil
           produto_id: item.produto_id,
           qtd: item.qtd,
           valor_unit: produto.preco,
