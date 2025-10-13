@@ -71,7 +71,11 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Erro ao buscar transferências:', error);
       return NextResponse.json(
-        { error: 'Erro ao buscar transferências' },
+        { 
+          error: 'Erro ao buscar transferências',
+          details: error.message,
+          code: error.code 
+        },
         { status: 500 }
       );
     }
