@@ -69,16 +69,17 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 6. Verificar se perfil existe
-    const { data: perfil } = await supabase
-      .from('perfis')
-      .select('user_id')
+    // 6. Buscar vendedor_id do usuário
+    const { data: vendedor } = await supabase
+      .from('vendedores')
+      .select('id')
       .eq('user_id', user.id)
+      .eq('empresa_id', empresaId)
       .single();
     
-    if (!perfil) {
+    if (!vendedor) {
       return NextResponse.json(
-        { error: 'Perfil não encontrado' },
+        { error: 'Vendedor não encontrado. Crie um vendedor primeiro.' },
         { status: 404 }
       );
     }
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
         .from('vendas')
         .insert({
           empresa_id: empresaId,
-          vendedor_id: user.id, // user_id do perfil
+          vendedor_id: vendedor.id, // ID do vendedor da tabela vendedores
           produto_id: item.produto_id,
           qtd: item.qtd,
           valor_unit: produto.preco,
@@ -184,10 +185,14 @@ export async function POST(request: NextRequest) {
       itens_count: vendasCriadas.length,
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao criar venda Solo:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { 
+        error: 'Erro interno do servidor',
+        message: error?.message || 'Erro desconhecido',
+        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     );
   }
