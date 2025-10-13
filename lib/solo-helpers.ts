@@ -128,6 +128,7 @@ export async function getSoloStats(empresaId: string): Promise<{
     .select('qtd, valor_unit')
     .eq('empresa_id', empresaId)
     .gte('data_hora', `${hoje}T00:00:00`)
+    .lte('data_hora', `${hoje}T23:59:59`)
     .eq('status', 'confirmado');
   
   const lucroEstimado = (vendas || []).reduce(

@@ -126,7 +126,14 @@ export async function POST(request: NextRequest) {
       
       if (vendaError) {
         console.error('Erro ao criar venda:', vendaError);
-        continue;
+        return NextResponse.json(
+          { 
+            error: 'Erro ao criar venda',
+            details: vendaError.message,
+            code: vendaError.code 
+          },
+          { status: 500 }
+        );
       }
       
       // Atualizar estoque
