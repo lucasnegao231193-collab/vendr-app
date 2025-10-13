@@ -51,6 +51,19 @@ export default function FinanceiroPage() {
 
   const loadData = async () => {
     try {
+      // Buscar empresa_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: perfil } = await supabase
+        .from("perfis")
+        .select("empresa_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!perfil) return;
+      const empresaId = perfil.empresa_id;
+
       const hoje = new Date().toISOString().split("T")[0];
       const primeiroDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         .toISOString()
@@ -70,6 +83,7 @@ export default function FinanceiroPage() {
             comissao_padrao
           )
         `)
+        .eq("empresa_id", empresaId)
         .gte("data_hora", `${primeiroDiaMes}T00:00:00`)
         .eq("status", "confirmado");
 
@@ -77,6 +91,7 @@ export default function FinanceiroPage() {
       const { data: despesasData } = await supabase
         .from("despesas")
         .select("*")
+        .eq("empresa_id", empresaId)
         .gte("data", primeiroDiaMes)
         .order("data", { ascending: false });
 

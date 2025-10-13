@@ -37,6 +37,18 @@ export default function RelatoriosPage() {
   const handleFiltrar = async () => {
     setLoading(true);
     try {
+      // Buscar empresa_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: perfil } = await supabase
+        .from("perfis")
+        .select("empresa_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!perfil) return;
+
       const { data, error } = await supabase
         .from("vendas")
         .select(
@@ -46,6 +58,7 @@ export default function RelatoriosPage() {
           produtos (nome)
         `
         )
+        .eq("empresa_id", perfil.empresa_id)
         .gte("data_hora", `${dataInicio}T00:00:00`)
         .lte("data_hora", `${dataFim}T23:59:59`)
         .order("data_hora", { ascending: false });
