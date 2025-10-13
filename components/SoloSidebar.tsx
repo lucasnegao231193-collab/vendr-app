@@ -71,25 +71,16 @@ export function SoloSidebar() {
       animate={{ x: 0, width: collapsed ? 80 : 280 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "fixed left-0 top-0 bottom-0 z-30",
+        "fixed left-0 top-16 bottom-0 z-30",
         "bg-trust-blue-900 dark:bg-trust-blue-800",
         "border-r border-trust-blue-800 dark:border-trust-blue-700",
         "flex flex-col"
       )}
     >
-      {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-trust-blue-800">
+      {/* Header com botão de colapsar */}
+      <div className="h-12 flex items-center justify-between px-4 border-b border-trust-blue-800">
         {!collapsed && (
-          <Link href="/solo" className="flex items-center gap-2">
-            <Image
-              src="/vendr-white-v3.png"
-              alt="Vendr"
-              width={120}
-              height={40}
-              className="h-8 w-auto"
-              priority
-            />
-          </Link>
+          <span className="text-white font-semibold text-sm">Menu Solo</span>
         )}
         <Button
           variant="ghost"

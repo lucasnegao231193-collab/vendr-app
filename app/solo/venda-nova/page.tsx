@@ -312,7 +312,7 @@ export default function SoloVendaNovaPage() {
               </div>
             </div>
           </motion.div>
-        </motion.div>
+        )}
     </div>
   );
 }
