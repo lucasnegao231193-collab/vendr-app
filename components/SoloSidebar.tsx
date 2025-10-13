@@ -72,21 +72,21 @@ export function SoloSidebar() {
       transition={{ duration: 0.3 }}
       className={cn(
         "fixed left-0 top-16 bottom-0 z-30",
-        "bg-trust-blue-900 dark:bg-trust-blue-800",
-        "border-r border-trust-blue-800 dark:border-trust-blue-700",
+        "bg-white dark:bg-trust-blue-800",
+        "border-r border-gray-200 dark:border-trust-blue-700",
         "flex flex-col"
       )}
     >
       {/* Header com botão de colapsar */}
-      <div className="h-12 flex items-center justify-between px-4 border-b border-trust-blue-800">
+      <div className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-trust-blue-700">
         {!collapsed && (
-          <span className="text-white font-semibold text-sm">Menu Solo</span>
+          <span className="font-semibold text-sm text-gray-700 dark:text-white">Menu Solo</span>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="text-white hover:bg-trust-blue-800 ml-auto"
+          className="ml-auto"
         >
           {collapsed ? (
             <ChevronRight className="h-5 w-5" />

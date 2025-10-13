@@ -264,7 +264,6 @@ export default function SoloVendasPage() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }
