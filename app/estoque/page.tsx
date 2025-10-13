@@ -37,7 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Package, Plus, ArrowUpDown, Download, Edit, MoreVertical, Trash2 } from "lucide-react";
+import { Package, Plus, ArrowUpDown, Download, Edit, MoreVertical, Trash2, Upload } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface EstoqueItem {
@@ -63,6 +63,7 @@ export default function EstoquePage() {
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "ativo" | "inativo">("todos");
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   const supabase = createClient();
   const { toast } = useToast();
@@ -77,26 +78,43 @@ export default function EstoquePage() {
 
   const loadEstoque = async () => {
     try {
+      // Buscar empresa_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: perfil } = await supabase
+        .from('perfis')
+        .select('empresa_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!perfil) return;
+
+      // Buscar produtos da empresa (usando tabela produtos diretamente)
       const { data, error } = await supabase
-        .from("estoques")
-        .select(`
-          id,
-          produto_id,
-          qtd,
-          produtos (
-            id,
-            nome,
-            marca,
-            preco,
-            unidade,
-            ativo
-          )
-        `)
-        .order("qtd", { ascending: true });
+        .from("produtos")
+        .select("id, nome, marca, preco, unidade, ativo, estoque_atual")
+        .eq("empresa_id", perfil.empresa_id)
+        .order("estoque_atual", { ascending: true });
 
       if (error) throw error;
 
-      setEstoque((data as any) || []);
+      // Transformar para o formato esperado
+      const estoqueFormatado = data?.map((p: any) => ({
+        id: p.id,
+        produto_id: p.id,
+        qtd: p.estoque_atual || 0,
+        produtos: {
+          id: p.id,
+          nome: p.nome,
+          marca: p.marca,
+          preco: p.preco,
+          unidade: p.unidade,
+          ativo: p.ativo,
+        },
+      })) || [];
+
+      setEstoque(estoqueFormatado);
     } catch (error) {
       console.error("Erro ao carregar estoque:", error);
     } finally {
@@ -220,7 +238,10 @@ export default function EstoquePage() {
               Gerencie seu inventário e movimentações
             </p>
           </div>
-          <Button className="bg-[#0D1B2A] hover:bg-[#1a2938] text-white gap-2 shadow-md">
+          <Button 
+            onClick={() => setShowAddDialog(true)}
+            className="bg-[#0D1B2A] hover:bg-[#1a2938] text-white gap-2 shadow-md"
+          >
             <Plus className="h-4 w-4" />
             Adicionar Produto
           </Button>
@@ -302,10 +323,16 @@ export default function EstoquePage() {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" onClick={exportCSV} className="gap-2">
-                <Download className="h-4 w-4" />
-                Exportar CSV
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => toast({ title: "Em breve!", description: "Funcionalidade de importação em desenvolvimento" })} className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Importar CSV
+                </Button>
+                <Button variant="outline" onClick={exportCSV} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Exportar CSV
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -397,6 +424,17 @@ export default function EstoquePage() {
           onSuccess={() => {
             loadEstoque();
             setShowEditDialog(false);
+          }}
+        />
+
+        {/* Dialog de Adicionar */}
+        <EditProductDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          produto={null}
+          onSuccess={() => {
+            loadEstoque();
+            setShowAddDialog(false);
           }}
         />
       </div>
