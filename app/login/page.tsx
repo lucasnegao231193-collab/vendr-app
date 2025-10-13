@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2, Building2, UserCircle2, User } from "lucide-react";
+import { Loader2, Building2, UserCircle2, User, Chrome } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 
@@ -26,6 +26,27 @@ export default function LoginPage() {
   const supabase = createClient();
   const { toast } = useToast();
   const router = useRouter();
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?type=${activeTab}`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Erro ao entrar com Google",
+        description: error.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,6 +184,26 @@ export default function LoginPage() {
                   Entrar como Empresa
                 </Button>
 
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Ou</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                >
+                  <Chrome className="mr-2 h-4 w-4" />
+                  Continuar com Google
+                </Button>
+
                 <div className="flex flex-col gap-2 text-center text-sm">
                   <Link href="/esqueci-senha" className="text-primary hover:underline">
                     Esqueci minha senha
@@ -206,6 +247,26 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full vendr-btn-primary" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Entrar como Autônomo
+                </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Ou</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                >
+                  <Chrome className="mr-2 h-4 w-4" />
+                  Continuar com Google
                 </Button>
 
                 <div className="flex flex-col gap-2 text-center text-sm">
