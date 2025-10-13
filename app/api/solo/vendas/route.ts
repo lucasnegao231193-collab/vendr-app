@@ -69,19 +69,35 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 6. Buscar vendedor_id do usuário
-    const { data: vendedor } = await supabase
+    // 6. Buscar ou criar vendedor
+    let { data: vendedor } = await supabase
       .from('vendedores')
       .select('id')
       .eq('user_id', user.id)
       .eq('empresa_id', empresaId)
       .single();
     
+    // Se não existir, criar vendedor automaticamente
     if (!vendedor) {
-      return NextResponse.json(
-        { error: 'Vendedor não encontrado. Crie um vendedor primeiro.' },
-        { status: 404 }
-      );
+      const { data: novoVendedor, error: vendedorError } = await supabase
+        .from('vendedores')
+        .insert({
+          user_id: user.id,
+          empresa_id: empresaId,
+          nome: 'Autônomo',
+          ativo: true,
+        })
+        .select('id')
+        .single();
+      
+      if (vendedorError || !novoVendedor) {
+        return NextResponse.json(
+          { error: 'Erro ao criar vendedor', details: vendedorError?.message },
+          { status: 500 }
+        );
+      }
+      
+      vendedor = novoVendedor;
     }
     
     // 7. Buscar produtos e calcular valores
