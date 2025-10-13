@@ -69,7 +69,21 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 6. Buscar produtos e calcular valores
+    // 6. Buscar perfil do usuário (vendedor)
+    const { data: perfil } = await supabase
+      .from('perfis')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (!perfil) {
+      return NextResponse.json(
+        { error: 'Perfil não encontrado' },
+        { status: 404 }
+      );
+    }
+    
+    // 7. Buscar produtos e calcular valores
     const produtoIds = itens.map(item => item.produto_id);
     const { data: produtos } = await supabase
       .from('produtos')
@@ -113,7 +127,7 @@ export async function POST(request: NextRequest) {
         .from('vendas')
         .insert({
           empresa_id: empresaId,
-          vendedor_id: user.id, // No Solo, o próprio dono é o vendedor
+          vendedor_id: perfil.id, // ID do perfil do vendedor
           produto_id: item.produto_id,
           qtd: item.qtd,
           valor_unit: produto.preco,
