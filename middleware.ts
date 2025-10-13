@@ -57,7 +57,37 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Verificar acesso às áreas protegidas
+  const path = request.nextUrl.pathname;
+  
+  if (user) {
+    // Buscar tipo de empresa do usuário
+    const { data: perfil } = await supabase
+      .from('perfis')
+      .select('empresa_id')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (perfil) {
+      const { data: empresa } = await supabase
+        .from('empresas')
+        .select('is_solo')
+        .eq('id', perfil.empresa_id)
+        .single();
+      
+      // Se é Solo (Autônomo) tentando acessar área de Empresa
+      if (empresa?.is_solo && path.startsWith('/dashboard')) {
+        return NextResponse.redirect(new URL('/solo', request.url));
+      }
+      
+      // Se é Empresa tentando acessar área Solo
+      if (empresa && !empresa.is_solo && path.startsWith('/solo')) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    }
+  }
 
   return response;
 }
