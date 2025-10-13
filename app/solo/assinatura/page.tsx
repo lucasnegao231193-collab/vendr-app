@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { ModernTopBar } from "@/components/ModernTopBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Check, Crown, Zap } from "lucide-react";
 import { motion } from "framer-motion";
@@ -59,10 +58,7 @@ export default function SoloAssinaturaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
-      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
-      
-      <div className="pt-20 px-4 md:px-6 pb-24 space-y-8">
+    <div className="p-6 pb-24 space-y-8 bg-gradient-to-br from-blue-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
         <Breadcrumbs />
 
         {/* Header */}
@@ -258,7 +254,6 @@ export default function SoloAssinaturaPage() {
             </Card>
           </div>
         </motion.div>
-      </div>
     </div>
   );
 }

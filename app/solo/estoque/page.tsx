@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { ModernTopBar } from "@/components/ModernTopBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { formatCurrency } from "@/lib/utils";
 import { Package, Plus, Edit, Trash2, TrendingUp, TrendingDown } from "lucide-react";
@@ -182,20 +181,14 @@ export default function SoloEstoquePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FB]">
-        <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
-        <div className="pt-20 px-4 md:px-6">
-          <TableSkeleton />
-        </div>
+      <div className="p-6">
+        <TableSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB]">
-      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
-      
-      <div className="pt-20 px-4 md:px-6 pb-24 space-y-6">
+    <div className="p-6 space-y-6">
         <Breadcrumbs />
 
         {/* Header */}
@@ -400,7 +393,6 @@ export default function SoloEstoquePage() {
             )}
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

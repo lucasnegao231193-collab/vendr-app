@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { ModernTopBar } from "@/components/ModernTopBar";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { formatCurrency } from "@/lib/utils";
 import { Minus, Plus, ShoppingCart, CreditCard, DollarSign, Smartphone } from "lucide-react";
@@ -178,10 +177,7 @@ export default function SoloVendaNovaPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB]">
-      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
-      
-      <div className="pt-20 px-4 md:px-6 pb-32 space-y-6">
+    <div className="p-6 pb-32 space-y-6">
         <Breadcrumbs />
 
         <motion.div
@@ -316,8 +312,7 @@ export default function SoloVendaNovaPage() {
               </div>
             </div>
           </motion.div>
-        )}
-      </div>
+        </motion.div>
     </div>
   );
 }
