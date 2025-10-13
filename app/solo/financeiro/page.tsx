@@ -147,7 +147,7 @@ export default function SoloFinanceiroPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F8F9FB]">
-        <ModernTopBar userName="Autônomo" />
+        <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
         <div className="pt-20 px-4 md:px-6">
           <TableSkeleton />
         </div>
@@ -157,7 +157,7 @@ export default function SoloFinanceiroPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
-      <ModernTopBar userName="Autônomo" />
+      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
       
       <div className="pt-20 px-4 md:px-6 pb-24 space-y-6">
         <Breadcrumbs />

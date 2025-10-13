@@ -60,7 +60,7 @@ export default function SoloAssinaturaPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 dark:from-gray-900 dark:to-gray-800">
-      <ModernTopBar userName="Autônomo" />
+      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
       
       <div className="pt-20 px-4 md:px-6 pb-24 space-y-8">
         <Breadcrumbs />

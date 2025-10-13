@@ -179,7 +179,7 @@ export default function SoloVendaNovaPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
-      <ModernTopBar userName="Autônomo" />
+      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
       
       <div className="pt-20 px-4 md:px-6 pb-32 space-y-6">
         <Breadcrumbs />
