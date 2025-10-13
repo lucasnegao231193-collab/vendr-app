@@ -47,10 +47,21 @@ export default function SoloOnboardingPage() {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password: senha,
+        options: {
+          emailRedirectTo: `${window.location.origin}/solo`,
+        },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Erro ao criar usuário");
+
+      // 2.5 Fazer login imediatamente (caso email confirmation esteja desabilitado)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: senha,
+      });
+
+      if (signInError) console.warn('Login após signup falhou:', signInError);
 
       // 3. Criar empresa Solo
       const { data: empresa, error: empresaError } = await supabase

@@ -71,8 +71,14 @@ export default function SoloEstoquePage() {
     e.preventDefault();
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Não autenticado");
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('User:', user);
+      console.log('User Error:', userError);
+      
+      if (!user) {
+        console.error('Usuário não autenticado. Session:', await supabase.auth.getSession());
+        throw new Error("Não autenticado");
+      }
 
       const { data: perfil } = await supabase
         .from('perfis')
