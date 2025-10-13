@@ -24,16 +24,32 @@ export default function DashboardPage() {
 
   const loadData = async () => {
     try {
+      // Buscar empresa_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: perfil } = await supabase
+        .from("perfis")
+        .select("empresa_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!perfil) return;
+
+      const empresaId = perfil.empresa_id;
+
       const [vendasRes, vendedoresRes] = await Promise.all([
         supabase
           .from("vendas")
           .select("*")
+          .eq("empresa_id", empresaId)
           .gte("data_hora", `${hoje}T00:00:00`)
           .lte("data_hora", `${hoje}T23:59:59`)
           .eq("status", "confirmado"),
         supabase
           .from("vendedores")
           .select("id, nome")
+          .eq("empresa_id", empresaId)
           .eq("ativo", true),
       ]);
 
