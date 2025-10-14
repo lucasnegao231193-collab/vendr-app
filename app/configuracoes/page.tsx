@@ -15,7 +15,7 @@ import {
   Shield, 
   MessageCircle 
 } from "lucide-react";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { PerfilEmpresaTab } from "@/components/configuracoes/PerfilEmpresaTab";
 import { EquipeTab } from "@/components/configuracoes/EquipeTab";
 import { BillingTab } from "@/components/configuracoes/BillingTab";
@@ -28,10 +28,8 @@ export default function ConfiguracoesPage() {
   const [activeTab, setActiveTab] = useState("perfil");
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <AuthenticatedLayout requiredRole="owner">
+      <div className="space-y-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
           <p className="text-muted-foreground mt-2">
@@ -102,6 +100,6 @@ export default function ConfiguracoesPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }
