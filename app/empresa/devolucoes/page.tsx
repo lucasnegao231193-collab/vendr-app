@@ -7,7 +7,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, CheckCircle, XCircle, RotateCcw } from "lucide-react";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { DevolucaoList } from "@/components/transferencias/DevolucaoList";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -54,10 +54,8 @@ export default function DevolucoesPag() {
   const pendentes = devolucoes.filter(d => d.status === 'aguardando_confirmacao');
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <AuthenticatedLayout requiredRole="owner">
+      <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
@@ -130,6 +128,6 @@ export default function DevolucoesPag() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }

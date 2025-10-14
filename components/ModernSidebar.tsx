@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   ArrowLeftRight,
   TrendingUp,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,12 @@ const navItems: NavItem[] = [
     label: "Transferências",
     href: "/transferencias",
     icon: ArrowLeftRight,
+    role: ["owner", "admin"],
+  },
+  {
+    label: "Devoluções",
+    href: "/empresa/devolucoes",
+    icon: RotateCcw,
     role: ["owner", "admin"],
   },
   {
