@@ -59,22 +59,37 @@ export default function VendaPage() {
       const { data: vendedorData } = await supabase
         .from("vendedores")
         .select("*")
-        .eq("empresa_id", perfil.empresa_id)
-        .limit(1)
+        .eq("user_id", user.id)
         .single();
 
-      if (vendedorData) {
-        setVendedorId(vendedorData.id);
+      if (!vendedorData) {
+        toast({
+          title: "Vendedor não encontrado",
+          description: "Você precisa estar cadastrado como vendedor",
+          variant: "destructive",
+        });
+        return;
       }
 
-      const { data: produtosData } = await supabase
-        .from("produtos")
-        .select("*")
-        .eq("empresa_id", perfil.empresa_id)
-        .eq("ativo", true)
-        .order("nome");
+      setVendedorId(vendedorData.id);
 
-      setProdutos(produtosData || []);
+      // Buscar produtos do estoque do vendedor
+      const { data: estoqueData } = await supabase
+        .from("vendedor_estoque")
+        .select(`
+          quantidade,
+          produto:produtos(*)
+        `)
+        .eq("vendedor_id", vendedorData.id)
+        .gt("quantidade", 0);
+
+      // Transformar para o formato esperado, incluindo quantidade disponível
+      const produtosComEstoque = estoqueData?.map((item: any) => ({
+        ...item.produto,
+        estoque_disponivel: item.quantidade,
+      })) || [];
+
+      setProdutos(produtosComEstoque);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     }
@@ -82,7 +97,20 @@ export default function VendaPage() {
 
   const handleQuantidadeChange = (produtoId: string, delta: number) => {
     setQuantidades((prev) => {
-      const newQtd = Math.max(0, (prev[produtoId] || 0) + delta);
+      const produto = produtos.find((p) => p.id === produtoId);
+      const estoqueDisponivel = produto?.estoque_disponivel || 0;
+      const qtdAtual = prev[produtoId] || 0;
+      const newQtd = Math.max(0, Math.min(estoqueDisponivel, qtdAtual + delta));
+      
+      // Avisar se tentou adicionar mais que o estoque
+      if (delta > 0 && qtdAtual >= estoqueDisponivel) {
+        toast({
+          title: "Estoque insuficiente",
+          description: `Você tem apenas ${estoqueDisponivel} unidade(s) disponível`,
+          variant: "destructive",
+        });
+      }
+      
       return { ...prev, [produtoId]: newQtd };
     });
   };

@@ -43,6 +43,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Produto não encontrado" }, { status: 404 });
     }
 
+    // Verificar estoque do vendedor
+    const { data: estoqueVendedor } = await supabase
+      .from("vendedor_estoque")
+      .select("id, quantidade")
+      .eq("vendedor_id", validated.vendedor_id)
+      .eq("produto_id", validated.produto_id)
+      .single();
+
+    if (!estoqueVendedor || estoqueVendedor.quantidade < validated.qtd) {
+      return NextResponse.json(
+        { 
+          error: "Estoque insuficiente",
+          disponivel: estoqueVendedor?.quantidade || 0,
+          solicitado: validated.qtd
+        },
+        { status: 422 }
+      );
+    }
+
     // Criar venda
     const { data: venda, error: vendaError } = await supabase
       .from("vendas")
@@ -60,6 +79,19 @@ export async function POST(request: NextRequest) {
 
     if (vendaError) {
       return NextResponse.json({ error: vendaError.message }, { status: 400 });
+    }
+
+    // Debitar do estoque do vendedor
+    const { error: estoqueError } = await supabase
+      .from("vendedor_estoque")
+      .update({
+        quantidade: estoqueVendedor.quantidade - validated.qtd,
+      })
+      .eq("id", estoqueVendedor.id);
+
+    if (estoqueError) {
+      console.error("Erro ao debitar estoque:", estoqueError);
+      // Não falhar a venda, mas logar o erro
     }
 
     return NextResponse.json({ success: true, venda }, { status: 201 });
