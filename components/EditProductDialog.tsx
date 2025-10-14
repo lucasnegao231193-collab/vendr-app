@@ -143,7 +143,6 @@ export function EditProductDialog({
             estoque_atual: qtdNum,
             ativo,
             unidade: "un",
-            sku: `SKU-${Date.now()}`,
           });
 
         if (produtoError) throw produtoError;

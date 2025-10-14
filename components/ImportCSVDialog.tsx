@@ -132,7 +132,6 @@ export function ImportCSVDialog({
         estoque_atual: p.quantidade,
         ativo: p.ativo,
         unidade: "un",
-        sku: `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       }));
 
       const { error } = await supabase
