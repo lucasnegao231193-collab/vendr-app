@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { EditProductDialog } from "@/components/EditProductDialog";
+import { ImportCSVDialog } from "@/components/ImportCSVDialog";
 import { useToast } from "@/components/ui/use-toast";
 import {
   DropdownMenu,
@@ -64,6 +65,7 @@ export default function EstoquePage() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   const supabase = createClient();
   const { toast } = useToast();
@@ -288,11 +290,12 @@ export default function EstoquePage() {
             <CardTitle>Filtros</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <Input
                 placeholder="Buscar produto..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
+                className="md:col-span-2"
               />
 
               <Select value={filtroMarca} onValueChange={setFiltroMarca}>
@@ -323,16 +326,15 @@ export default function EstoquePage() {
                 </SelectContent>
               </Select>
 
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => toast({ title: "Em breve!", description: "Funcionalidade de importação em desenvolvimento" })} className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Importar CSV
-                </Button>
-                <Button variant="outline" onClick={exportCSV} className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Exportar CSV
-                </Button>
-              </div>
+              <Button variant="outline" onClick={() => setShowImportDialog(true)} className="gap-2">
+                <Upload className="h-4 w-4" />
+                Importar CSV
+              </Button>
+              
+              <Button variant="outline" onClick={exportCSV} className="gap-2">
+                <Download className="h-4 w-4" />
+                Exportar CSV
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -435,6 +437,16 @@ export default function EstoquePage() {
           onSuccess={() => {
             loadEstoque();
             setShowAddDialog(false);
+          }}
+        />
+
+        {/* Dialog de Importar CSV */}
+        <ImportCSVDialog
+          open={showImportDialog}
+          onOpenChange={setShowImportDialog}
+          onSuccess={() => {
+            loadEstoque();
+            setShowImportDialog(false);
           }}
         />
       </div>

@@ -58,13 +58,18 @@ export function EditProductDialog({
       setPreco(produto.preco.toString());
       setQuantidade(produto.qtd.toString());
       setAtivo(produto.ativo);
+    } else {
+      // Limpar campos para novo produto
+      setNome("");
+      setMarca("");
+      setPreco("");
+      setQuantidade("");
+      setAtivo(true);
     }
-  }, [produto]);
+  }, [produto, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!produto) return;
 
     if (!nome.trim()) {
       toast({
@@ -95,38 +100,66 @@ export function EditProductDialog({
     setLoading(true);
 
     try {
-      // Atualizar produto
-      const { error: produtoError } = await supabase
-        .from("produtos")
-        .update({
-          nome: nome.trim(),
-          marca: marca.trim() || null,
-          preco: precoNum,
-          ativo,
-        })
-        .eq("id", produto.produto_id);
+      // Buscar empresa_id do usuário
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
 
-      if (produtoError) throw produtoError;
+      const { data: perfil } = await supabase
+        .from('perfis')
+        .select('empresa_id')
+        .eq('user_id', user.id)
+        .single();
 
-      // Atualizar estoque (quantidade)
-      const { error: estoqueError } = await supabase
-        .from("estoques")
-        .update({ qtd: qtdNum })
-        .eq("id", produto.id);
+      if (!perfil) throw new Error("Perfil não encontrado");
 
-      if (estoqueError) throw estoqueError;
+      if (produto) {
+        // EDITAR produto existente
+        const { error: produtoError } = await supabase
+          .from("produtos")
+          .update({
+            nome: nome.trim(),
+            marca: marca.trim() || null,
+            preco: precoNum,
+            estoque_atual: qtdNum,
+            ativo,
+          })
+          .eq("id", produto.produto_id);
 
-      toast({
-        title: "Produto atualizado!",
-        description: "As alterações foram salvas com sucesso",
-      });
+        if (produtoError) throw produtoError;
+
+        toast({
+          title: "Produto atualizado!",
+          description: "As alterações foram salvas com sucesso",
+        });
+      } else {
+        // CRIAR novo produto
+        const { error: produtoError } = await supabase
+          .from("produtos")
+          .insert({
+            empresa_id: perfil.empresa_id,
+            nome: nome.trim(),
+            marca: marca.trim() || null,
+            preco: precoNum,
+            estoque_atual: qtdNum,
+            ativo,
+            unidade: "un",
+            sku: `SKU-${Date.now()}`,
+          });
+
+        if (produtoError) throw produtoError;
+
+        toast({
+          title: "Produto criado!",
+          description: "O produto foi adicionado ao estoque",
+        });
+      }
 
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      console.error("Erro ao atualizar produto:", error);
+      console.error("Erro ao salvar produto:", error);
       toast({
-        title: "Erro ao atualizar",
+        title: "Erro ao salvar",
         description: error.message || "Tente novamente",
         variant: "destructive",
       });
@@ -139,9 +172,9 @@ export function EditProductDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Editar Produto</DialogTitle>
+          <DialogTitle>{produto ? "Editar Produto" : "Adicionar Produto"}</DialogTitle>
           <DialogDescription>
-            Atualize as informações do produto
+            {produto ? "Atualize as informações do produto" : "Preencha os dados do novo produto"}
           </DialogDescription>
         </DialogHeader>
 
