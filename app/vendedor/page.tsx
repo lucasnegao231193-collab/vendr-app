@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { GlobalTopBar } from "@/components/GlobalTopBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -123,13 +123,15 @@ export default function VendedorHomePage() {
   const comissaoEstimada = totalVendido * (kit?.vendedores?.comissao_padrao || 0.10);
 
   return (
-    <AuthenticatedLayout requiredRole="seller">
-      <div className="space-y-6 pb-20">
+    <div className="min-h-screen bg-background">
+      <GlobalTopBar />
+      
+      <div className="container mx-auto px-4 py-8 max-w-7xl space-y-6 pb-20">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Olá, Vendedor!</h1>
-            <p className="text-[var(--text-secondary)]">
+            <h1 className="text-3xl font-bold">Olá, Vendedor!</h1>
+            <p className="text-muted-foreground">
               {new Date().toLocaleDateString("pt-BR")}
             </p>
           </div>
@@ -270,6 +272,6 @@ export default function VendedorHomePage() {
           </Button>
         </Link>
       </div>
-    </AuthenticatedLayout>
+    </div>
   );
 }
