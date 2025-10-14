@@ -80,11 +80,11 @@ export async function POST(request: NextRequest) {
 
     // 4. Verificar estoque disponível para cada produto
     const produtoIds = validated.itens.map((item) => item.produtoId);
-    const { data: estoques, error: estoqueError } = await supabase
-      .from('estoques')
-      .select('produto_id, qtd')
+    const { data: produtosEstoque, error: estoqueError } = await supabase
+      .from('produtos')
+      .select('id, estoque_atual, preco, nome')
       .eq('empresa_id', perfil.empresa_id)
-      .in('produto_id', produtoIds);
+      .in('id', produtoIds);
 
     if (estoqueError) {
       return NextResponse.json(
@@ -95,8 +95,11 @@ export async function POST(request: NextRequest) {
 
     // Mapear estoque disponível
     const estoqueMap = new Map(
-      estoques?.map((e) => [e.produto_id, e.qtd]) || []
+      produtosEstoque?.map((p) => [p.id, p.estoque_atual]) || []
     );
+    
+    // Mapear preços
+    const precoMap = new Map(produtosEstoque?.map((p) => [p.id, p.preco]) || []);
 
     // Validar disponibilidade
     const produtosInsuficientes = validated.itens.filter(
@@ -122,14 +125,6 @@ export async function POST(request: NextRequest) {
         { status: 422 }
       );
     }
-
-    // 5. Buscar preços dos produtos
-    const { data: produtos } = await supabase
-      .from('produtos')
-      .select('id, preco')
-      .in('id', produtoIds);
-
-    const precoMap = new Map(produtos?.map((p) => [p.id, p.preco]) || []);
 
     // 6. TRANSAÇÃO: Criar transferência + debitar estoque
     // 6.1. Criar transferência
@@ -179,10 +174,10 @@ export async function POST(request: NextRequest) {
     for (const item of validated.itens) {
       const estoqueAtual = estoqueMap.get(item.produtoId) || 0;
       const { error: updateError } = await supabase
-        .from('estoques')
-        .update({ qtd: estoqueAtual - item.quantidade })
+        .from('produtos')
+        .update({ estoque_atual: estoqueAtual - item.quantidade })
         .eq('empresa_id', perfil.empresa_id)
-        .eq('produto_id', item.produtoId);
+        .eq('id', item.produtoId);
 
       if (updateError) {
         // Rollback
@@ -193,7 +188,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Criar movimento de estoque
+      // Criar movimento de estoque (se a tabela existir)
       await supabase.from('estoque_movs').insert({
         empresa_id: perfil.empresa_id,
         produto_id: item.produtoId,
