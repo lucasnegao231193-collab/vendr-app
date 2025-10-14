@@ -15,7 +15,7 @@ import {
   Users,
   Package,
   ArrowRight,
-  Plus,
+  ArrowLeftRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -54,9 +54,9 @@ export function DashboardEmpresa({
 }: DashboardEmpresaProps) {
   const acoes = [
     {
-      label: "Nova Venda",
-      href: "/operacoes",
-      icon: Plus,
+      label: "Transferências",
+      href: "/transferencias",
+      icon: ArrowLeftRight,
       color: "bg-venlo-orange-500 hover:bg-venlo-orange-600",
     },
     {

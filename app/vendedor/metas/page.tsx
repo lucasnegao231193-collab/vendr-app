@@ -8,8 +8,12 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { VendedorLayout } from "@/components/VendedorLayout";
-import { Target, TrendingUp, Calendar, DollarSign, Award, Clock } from "lucide-react";
+import { Target, TrendingUp, Calendar, DollarSign, Award, Clock, Plus, Settings } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { useToast } from "@/components/ui/use-toast";
 import { formatCurrency } from "@/lib/utils";
@@ -20,6 +24,13 @@ export default function MetasPage() {
   const [metas, setMetas] = useState<any[]>([]);
   const [vendas, setVendas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [vendedorId, setVendedorId] = useState<string>("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [savingMeta, setSavingMeta] = useState(false);
+  const [novaMeta, setNovaMeta] = useState({
+    data: new Date().toISOString().split('T')[0],
+    valor: "",
+  });
   const [stats, setStats] = useState({
     metaHoje: 0,
     vendidoHoje: 0,
@@ -46,6 +57,8 @@ export default function MetasPage() {
         .single();
 
       if (!vendedor) return;
+      
+      setVendedorId(vendedor.id);
 
       // Buscar metas
       const { data: metasData } = await supabase
@@ -97,6 +110,53 @@ export default function MetasPage() {
     }
   };
 
+  const handleSalvarMeta = async () => {
+    if (!novaMeta.valor || parseFloat(novaMeta.valor) <= 0) {
+      toast({
+        title: "Valor inválido",
+        description: "Digite um valor válido para a meta",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingMeta(true);
+    try {
+      const { error } = await supabase
+        .from('metas')
+        .upsert({
+          vendedor_id: vendedorId,
+          data: novaMeta.data,
+          valor_meta: parseFloat(novaMeta.valor),
+        }, {
+          onConflict: 'vendedor_id,data'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Meta configurada!",
+        description: `Meta de ${formatCurrency(parseFloat(novaMeta.valor))} definida para ${format(new Date(novaMeta.data + 'T00:00:00'), "dd/MM/yyyy")}`,
+      });
+
+      setOpenDialog(false);
+      setNovaMeta({
+        data: new Date().toISOString().split('T')[0],
+        valor: "",
+      });
+      loadData();
+    } catch (error: any) {
+      console.error('Erro ao salvar meta:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a meta",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingMeta(false);
+    }
+  };
+
   const progressoHoje = stats.metaHoje > 0 ? (stats.vendidoHoje / stats.metaHoje) * 100 : 0;
   const progressoMes = stats.metaMes > 0 ? (stats.vendidoMes / stats.metaMes) * 100 : 0;
 
@@ -112,14 +172,71 @@ export default function MetasPage() {
       
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Target className="h-8 w-8 text-primary" />
-            Minhas Metas
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Acompanhe seu desempenho e progresso nas metas
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+              <Target className="h-8 w-8 text-primary" />
+              Minhas Metas
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Acompanhe seu desempenho e progresso nas metas
+            </p>
+          </div>
+
+          {/* Botão Configurar Meta */}
+          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Settings className="h-4 w-4" />
+                Configurar Meta
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Configurar Meta</DialogTitle>
+                <DialogDescription>
+                  Defina sua meta de vendas para acompanhar seu desempenho
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="data">Data</Label>
+                  <Input
+                    id="data"
+                    type="date"
+                    value={novaMeta.data}
+                    onChange={(e) => setNovaMeta({ ...novaMeta, data: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="valor">Valor da Meta (R$)</Label>
+                  <Input
+                    id="valor"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0,00"
+                    value={novaMeta.valor}
+                    onChange={(e) => setNovaMeta({ ...novaMeta, valor: e.target.value })}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Digite o valor total que deseja vender neste dia
+                  </p>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpenDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSalvarMeta} disabled={savingMeta}>
+                  {savingMeta ? "Salvando..." : "Salvar Meta"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Stats Cards */}
