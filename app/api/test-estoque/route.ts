@@ -43,17 +43,25 @@ export async function GET(request: NextRequest) {
     console.log('✅ Usuário autenticado:', user.id);
     console.log('✅ Empresa ID:', perfil.empresa_id);
 
-    // Buscar um produto (Coca Cola)
-    const { data: produto } = await supabase
+    // Buscar um produto (Coca Cola) - SEM filtrar por empresa_id primeiro
+    const { data: produtos, error: produtoError } = await supabase
       .from('produtos')
-      .select('id, nome')
-      .eq('empresa_id', perfil.empresa_id)
-      .ilike('nome', '%coca%')
-      .single();
+      .select('id, nome, empresa_id')
+      .ilike('nome', '%coca%');
 
-    if (!produto) {
-      return NextResponse.json({ error: 'Produto Coca Cola não encontrado' }, { status: 404 });
+    console.log('🔍 Produtos encontrados:', produtos);
+    console.log('❌ Erro ao buscar produtos:', produtoError);
+
+    if (!produtos || produtos.length === 0) {
+      return NextResponse.json({ 
+        error: 'Produto Coca Cola não encontrado',
+        produtoError,
+        empresa_id: perfil.empresa_id
+      }, { status: 404 });
     }
+
+    // Pegar o primeiro produto encontrado
+    const produto = produtos[0];
 
     console.log('✅ Produto encontrado:', produto.nome, produto.id);
 
