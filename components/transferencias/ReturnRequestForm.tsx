@@ -52,15 +52,25 @@ export function ReturnRequestForm({ onSuccess, onCancel }: ReturnRequestFormProp
     if (!vendedor) return;
 
     // Buscar estoque do vendedor
-    const { data: estoque } = await supabase
+    const { data: estoque, error } = await supabase
       .from('vendedor_estoque')
       .select(`
         produto_id,
         quantidade,
-        produto:produtos(id, nome, sku)
+        produto:produtos(id, nome, preco, unidade)
       `)
       .eq('vendedor_id', vendedor.id)
       .gt('quantidade', 0);
+
+    if (error) {
+      console.error('Erro ao carregar estoque:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os produtos",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setProdutos(estoque || []);
   };
@@ -184,7 +194,7 @@ export function ReturnRequestForm({ onSuccess, onCancel }: ReturnRequestFormProp
               <SelectContent>
                 {produtos.map(p => (
                   <SelectItem key={p.produto_id} value={p.produto_id}>
-                    {p.produto?.nome} - SKU: {p.produto?.sku} (Você tem: {p.quantidade})
+                    {p.produto?.nome} - {p.produto?.unidade} (Você tem: {p.quantidade})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -228,7 +238,7 @@ export function ReturnRequestForm({ onSuccess, onCancel }: ReturnRequestFormProp
                 <div className="flex-1">
                   <p className="font-medium">{item.produto.nome}</p>
                   <p className="text-sm text-muted-foreground">
-                    SKU: {item.produto.sku} | Quantidade: {item.quantidade}
+                    Unidade: {item.produto.unidade} | Quantidade: {item.quantidade}
                   </p>
                 </div>
                 <Button
