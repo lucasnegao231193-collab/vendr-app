@@ -1,6 +1,5 @@
 /**
- * VendedorSidebar - Sidebar lateral para área do vendedor
- * Inspirado no design do painel Solo
+ * EmpresaSidebar - Sidebar lateral para área da empresa
  */
 "use client";
 
@@ -12,14 +11,14 @@ import {
   LayoutDashboard,
   Package,
   ShoppingCart,
-  PackageSearch,
-  Target,
-  Calculator,
-  CheckCircle,
+  Users,
+  DollarSign,
+  FileText,
+  Settings,
+  Send,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import Image from "next/image";
 
 interface MenuItem {
   label: string;
@@ -30,42 +29,52 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   {
     label: "Dashboard",
-    href: "/vendedor",
+    href: "/dashboard",
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
-    label: "Meu Estoque",
-    href: "/vendedor/estoque",
+    label: "Estoque",
+    href: "/estoque",
     icon: <Package className="h-5 w-5" />,
   },
   {
-    label: "Nova Venda",
-    href: "/vendedor/venda",
+    label: "Produtos",
+    href: "/produtos",
+    icon: <Package className="h-5 w-5" />,
+  },
+  {
+    label: "Vendas",
+    href: "/vendas",
     icon: <ShoppingCart className="h-5 w-5" />,
   },
   {
+    label: "Vendedores",
+    href: "/vendedores",
+    icon: <Users className="h-5 w-5" />,
+  },
+  {
     label: "Transferências",
-    href: "/vendedor/transferencias-recebidas",
-    icon: <PackageSearch className="h-5 w-5" />,
+    href: "/transferencias",
+    icon: <Send className="h-5 w-5" />,
   },
   {
-    label: "Minhas Metas",
-    href: "/vendedor/metas",
-    icon: <Target className="h-5 w-5" />,
+    label: "Financeiro",
+    href: "/financeiro",
+    icon: <DollarSign className="h-5 w-5" />,
   },
   {
-    label: "Calculadora",
-    href: "/vendedor/troco",
-    icon: <Calculator className="h-5 w-5" />,
+    label: "Relatórios",
+    href: "/relatorios",
+    icon: <FileText className="h-5 w-5" />,
   },
   {
-    label: "Fechar Dia",
-    href: "/vendedor/fechar",
-    icon: <CheckCircle className="h-5 w-5" />,
+    label: "Configurações",
+    href: "/configuracoes",
+    icon: <Settings className="h-5 w-5" />,
   },
 ];
 
-export function VendedorSidebar() {
+export function EmpresaSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -81,12 +90,12 @@ export function VendedorSidebar() {
         {/* Menu Title */}
         {!collapsed && (
           <div className="px-6 py-4 text-sm text-white/60 font-medium border-b border-white/10">
-            Menu Vendedor
+            Menu Empresa
           </div>
         )}
 
         {/* Menu Items */}
-        <nav className="flex-1 px-3 py-2 space-y-1">
+        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
           {menuItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             

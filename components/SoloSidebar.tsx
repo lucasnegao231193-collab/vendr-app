@@ -67,14 +67,12 @@ export function SoloSidebar() {
 
   return (
     <motion.aside
-      initial={{ x: -280 }}
-      animate={{ x: 0, width: collapsed ? 80 : 280 }}
+      initial={{ x: -300 }}
+      animate={{ x: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "fixed left-0 top-16 bottom-0 z-30",
-        "bg-white dark:bg-trust-blue-800",
-        "border-r border-gray-200 dark:border-trust-blue-700",
-        "flex flex-col"
+        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-[#0f172a] text-white border-r border-white/10 z-30 transition-all duration-300",
+        collapsed ? "w-20" : "w-64"
       )}
     >
       {/* Header com botão de colapsar */}

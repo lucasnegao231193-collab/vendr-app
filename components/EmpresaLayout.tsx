@@ -1,22 +1,22 @@
 /**
- * VendedorLayout - Layout completo para área do vendedor
+ * EmpresaLayout - Layout completo para área da empresa
  * Inclui TopBar + Sidebar
  */
 "use client";
 
 import { UnifiedTopBar } from "./UnifiedTopBar";
-import { VendedorSidebar } from "./VendedorSidebar";
+import { EmpresaSidebar } from "./EmpresaSidebar";
 
-interface VendedorLayoutProps {
+interface EmpresaLayoutProps {
   children: React.ReactNode;
 }
 
-export function VendedorLayout({ children }: VendedorLayoutProps) {
+export function EmpresaLayout({ children }: EmpresaLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      <UnifiedTopBar userRole="seller" />
+      <UnifiedTopBar userRole="owner" />
       <div className="flex pt-16">
-        <VendedorSidebar />
+        <EmpresaSidebar />
         <main className="flex-1 w-full">
           {children}
         </main>
