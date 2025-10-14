@@ -27,23 +27,36 @@ export default function DevolucoesPag() {
 
   const loadDevolucoes = async () => {
     try {
-      const response = await fetch('/api/devolucoes/empresa');
-      if (!response.ok) throw new Error('Erro ao carregar');
+      // Buscar todas as devoluções (sem filtro de status)
+      const [pendentesRes, aceitasRes, recusadasRes] = await Promise.all([
+        fetch('/api/devolucoes/empresa?status=aguardando_confirmacao'),
+        fetch('/api/devolucoes/empresa?status=aceita'),
+        fetch('/api/devolucoes/empresa?status=recusada'),
+      ]);
+
+      const pendentesData = await pendentesRes.json();
+      const aceitasData = await aceitasRes.json();
+      const recusadasData = await recusadasRes.json();
+
+      if (!pendentesRes.ok) {
+        console.error('Erro ao buscar pendentes:', pendentesData);
+        throw new Error(pendentesData.details || pendentesData.error || 'Erro ao carregar');
+      }
       
-      const data = await response.json();
-      setDevolucoes(data.devolucoes || []);
+      // Usar apenas as pendentes para exibir
+      setDevolucoes(pendentesData.devolucoes || []);
       
       // Calcular stats
-      const pendentes = data.devolucoes?.filter((d: any) => d.status === 'aguardando_confirmacao').length || 0;
-      const aceitas = data.devolucoes?.filter((d: any) => d.status === 'aceita').length || 0;
-      const recusadas = data.devolucoes?.filter((d: any) => d.status === 'recusada').length || 0;
-      
-      setStats({ pendentes, aceitas, recusadas });
-    } catch (error) {
+      setStats({
+        pendentes: pendentesData.count || 0,
+        aceitas: aceitasData.count || 0,
+        recusadas: recusadasData.count || 0,
+      });
+    } catch (error: any) {
       console.error('Erro ao carregar devoluções:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar as devoluções",
+        description: error.message || "Não foi possível carregar as devoluções",
         variant: "destructive",
       });
     } finally {

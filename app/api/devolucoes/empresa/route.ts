@@ -50,12 +50,12 @@ export async function GET(request: NextRequest) {
       .from('devolucoes')
       .select(`
         *,
-        vendedor:vendedores!vendedor_id(id, nome, email),
+        vendedor:vendedores!vendedor_id(id, nome),
         itens:devolucao_itens(
           id,
           produto_id,
           quantidade,
-          produto:produtos(id, nome, sku, preco)
+          produto:produtos(id, nome, preco, unidade)
         )
       `)
       .eq('empresa_id', perfil.empresa_id)
@@ -64,11 +64,18 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Erro ao buscar devoluções:', error);
+      console.error('Detalhes do erro:', JSON.stringify(error, null, 2));
       return NextResponse.json(
-        { error: 'Erro ao buscar devoluções' },
+        { 
+          error: 'Erro ao buscar devoluções',
+          details: error.message,
+          code: error.code
+        },
         { status: 500 }
       );
     }
+
+    console.log(`Devoluções encontradas: ${devolucoes?.length || 0} com status: ${status}`);
 
     return NextResponse.json({
       devolucoes: devolucoes || [],
