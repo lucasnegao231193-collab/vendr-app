@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { VendedorLayout } from "@/components/VendedorLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -126,9 +126,7 @@ export default function VendedorHomePage() {
   const comissaoEstimada = totalVendido * (kit?.vendedores?.comissao_padrao || 0.10);
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
-      
+    <VendedorLayout>
       <div className="container mx-auto px-4 py-8 max-w-7xl space-y-6 pb-20">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -316,6 +314,6 @@ export default function VendedorHomePage() {
           </Button>
         </Link>
       </div>
-    </div>
+    </VendedorLayout>
   );
 }

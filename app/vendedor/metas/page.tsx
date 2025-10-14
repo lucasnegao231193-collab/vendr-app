@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { VendedorLayout } from "@/components/VendedorLayout";
 import { Target, TrendingUp, Calendar, DollarSign, Award, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { useToast } from "@/components/ui/use-toast";
@@ -108,8 +108,7 @@ export default function MetasPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
+    <VendedorLayout>
       
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
@@ -280,6 +279,6 @@ export default function MetasPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </VendedorLayout>
   );
 }

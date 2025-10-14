@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Package, RotateCcw, TrendingUp, DollarSign } from "lucide-react";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { VendedorLayout } from "@/components/VendedorLayout";
 import { VendedorStockList } from "@/components/transferencias/VendedorStockList";
 import { ReturnRequestForm } from "@/components/transferencias/ReturnRequestForm";
 import { useToast } from "@/components/ui/use-toast";
@@ -85,8 +85,7 @@ export default function VendedorEstoquePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
+    <VendedorLayout>
       
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
@@ -190,6 +189,6 @@ export default function VendedorEstoquePage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </VendedorLayout>
   );
 }

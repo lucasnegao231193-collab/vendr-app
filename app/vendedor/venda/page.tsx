@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProductGrid } from "@/components/ProductGrid";
 import { PixModal } from "@/components/PixModal";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { VendedorLayout } from "@/components/VendedorLayout";
 import { useToast } from "@/components/ui/use-toast";
 import { useOfflineSync } from "@/store/offlineQueue";
 import { formatCurrency } from "@/lib/utils";
@@ -222,9 +222,7 @@ export default function VendaPage() {
   const temItens = Object.values(quantidades).some((q) => q > 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
-      
+    <VendedorLayout>
       <div className="container mx-auto px-4 py-8 pb-24 max-w-6xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
@@ -329,6 +327,6 @@ export default function VendaPage() {
           onConfirm={finalizarVenda}
         />
       </div>
-    </div>
+    </VendedorLayout>
   );
 }

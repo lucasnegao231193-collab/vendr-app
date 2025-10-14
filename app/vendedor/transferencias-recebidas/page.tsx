@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle, XCircle, PackageSearch } from "lucide-react";
-import { GlobalTopBar } from "@/components/GlobalTopBar";
+import { VendedorLayout } from "@/components/VendedorLayout";
 import { ReceivedTransferCard } from "@/components/transferencias/ReceivedTransferCard";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -55,8 +55,7 @@ export default function TransferenciasRecebidasPage() {
   const pendentes = transferencias.filter(t => t.status === 'aguardando_aceite');
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalTopBar />
+    <VendedorLayout>
       
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
@@ -151,6 +150,6 @@ export default function TransferenciasRecebidasPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </VendedorLayout>
   );
 }
