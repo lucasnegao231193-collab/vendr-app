@@ -266,12 +266,20 @@ export function TransferForm({ onSuccess, onCancel }: TransferFormProps) {
                 value={quantidade}
                 onChange={(e) => setQuantidade(parseInt(e.target.value) || 1)}
               />
-              <Button onClick={handleAddItem} type="button">
+              <Button 
+                onClick={handleAddItem} 
+                type="button"
+                className="bg-primary hover:bg-primary/90 text-white gap-2 min-w-[120px]"
+              >
                 <Plus className="h-4 w-4" />
+                Adicionar
               </Button>
             </div>
           </div>
         </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          💡 Selecione o produto e quantidade, depois clique em "Adicionar" para incluir no carrinho
+        </p>
       </div>
 
       {/* Carrinho */}
