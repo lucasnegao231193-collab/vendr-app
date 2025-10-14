@@ -79,17 +79,22 @@ export function TransferForm({ onSuccess, onCancel }: TransferFormProps) {
     if (!perfil) return;
 
     // Buscar produtos com estoque disponível
-    const { data: produtosData } = await supabase
+    const { data: produtosData, error } = await supabase
       .from('produtos')
-      .select('id, nome, sku, preco, estoque_atual')
+      .select('id, nome, preco, estoque_atual')
       .eq('empresa_id', perfil.empresa_id)
       .gt('estoque_atual', 0)
       .order('nome');
 
+    if (error) {
+      console.error('Erro ao carregar produtos:', error);
+      return;
+    }
+
     const produtosComEstoque = produtosData?.map((p: any) => ({
       id: p.id,
       nome: p.nome,
-      sku: p.sku,
+      sku: `PROD-${p.id.substring(0, 8)}`,
       preco: p.preco,
       estoque_disponivel: p.estoque_atual,
     })) || [];
