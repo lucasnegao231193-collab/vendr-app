@@ -105,56 +105,90 @@ export async function POST(
     }
 
     // 2. Debitar estoque do vendedor e creditar empresa
+    console.log(`Processando ${devolucao.itens.length} itens da devolução...`);
+    
     for (const item of devolucao.itens) {
+      console.log(`Processando produto ${item.produto_id}, quantidade: ${item.quantidade}`);
+      
       // Debitar vendedor
-      const { data: estoqueVendedor } = await supabase
+      const { data: estoqueVendedor, error: estoqueVendedorError } = await supabase
         .from('vendedor_estoque')
         .select('id, quantidade')
         .eq('vendedor_id', devolucao.vendedor_id)
         .eq('produto_id', item.produto_id)
         .single();
 
+      if (estoqueVendedorError) {
+        console.error('Erro ao buscar estoque vendedor:', estoqueVendedorError);
+      }
+
       if (estoqueVendedor && estoqueVendedor.quantidade >= item.quantidade) {
         const novaQtd = estoqueVendedor.quantidade - item.quantidade;
+        console.log(`Debitando ${item.quantidade} do vendedor. Nova qtd: ${novaQtd}`);
         
         if (novaQtd === 0) {
           // Remover registro se ficar zerado
-          await supabase
+          const { error: deleteError } = await supabase
             .from('vendedor_estoque')
             .delete()
             .eq('id', estoqueVendedor.id);
+          
+          if (deleteError) {
+            console.error('Erro ao deletar estoque vendedor:', deleteError);
+          }
         } else {
-          await supabase
+          const { error: updateError } = await supabase
             .from('vendedor_estoque')
             .update({ quantidade: novaQtd })
             .eq('id', estoqueVendedor.id);
+          
+          if (updateError) {
+            console.error('Erro ao atualizar estoque vendedor:', updateError);
+          }
         }
       }
 
       // Creditar empresa
-      const { data: estoqueEmpresa } = await supabase
+      const { data: estoqueEmpresa, error: estoqueEmpresaError } = await supabase
         .from('estoques')
         .select('id, qtd')
         .eq('empresa_id', perfil.empresa_id)
         .eq('produto_id', item.produto_id)
         .single();
 
+      if (estoqueEmpresaError && estoqueEmpresaError.code !== 'PGRST116') {
+        console.error('Erro ao buscar estoque empresa:', estoqueEmpresaError);
+      }
+
       if (estoqueEmpresa) {
-        await supabase
+        const novaQtdEmpresa = estoqueEmpresa.qtd + item.quantidade;
+        console.log(`Creditando ${item.quantidade} para empresa. Nova qtd: ${novaQtdEmpresa}`);
+        
+        const { error: updateEmpresaError } = await supabase
           .from('estoques')
-          .update({ qtd: estoqueEmpresa.qtd + item.quantidade })
+          .update({ qtd: novaQtdEmpresa })
           .eq('id', estoqueEmpresa.id);
+        
+        if (updateEmpresaError) {
+          console.error('Erro ao atualizar estoque empresa:', updateEmpresaError);
+        }
       } else {
         // Criar se não existe
-        await supabase.from('estoques').insert({
+        console.log(`Criando novo registro de estoque empresa com qtd: ${item.quantidade}`);
+        
+        const { error: insertError } = await supabase.from('estoques').insert({
           empresa_id: perfil.empresa_id,
           produto_id: item.produto_id,
           qtd: item.quantidade,
         });
+        
+        if (insertError) {
+          console.error('Erro ao criar estoque empresa:', insertError);
+        }
       }
 
       // Criar movimento de entrada
-      await supabase.from('estoque_movs').insert({
+      const { error: movError } = await supabase.from('estoque_movs').insert({
         empresa_id: perfil.empresa_id,
         produto_id: item.produto_id,
         tipo: 'entrada',
@@ -162,7 +196,13 @@ export async function POST(
         motivo: `Devolução aceita de ${devolucao.vendedor.nome}`,
         user_id: user.id,
       });
+      
+      if (movError) {
+        console.error('Erro ao criar movimento:', movError);
+      }
     }
+    
+    console.log('Todos os itens processados com sucesso!');
 
     // 3. Registrar log
     await supabase.from('estoque_logs').insert({
