@@ -123,8 +123,13 @@ export async function POST(request: NextRequest) {
 
     if (devolucaoError || !devolucao) {
       console.error('Erro ao criar devolução:', devolucaoError);
+      console.error('Detalhes do erro:', JSON.stringify(devolucaoError, null, 2));
       return NextResponse.json(
-        { error: 'Erro ao criar devolução' },
+        { 
+          error: 'Erro ao criar devolução',
+          details: devolucaoError?.message || 'Erro desconhecido',
+          code: devolucaoError?.code
+        },
         { status: 500 }
       );
     }
