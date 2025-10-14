@@ -42,8 +42,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Buscar transferências pendentes
-    const { data: transferencias, error } = await supabase
+    // Verificar se deve buscar todas ou só pendentes
+    const searchParams = request.nextUrl.searchParams;
+    const all = searchParams.get('all') === 'true';
+
+    // Buscar transferências
+    let query = supabase
       .from('transferencias')
       .select(`
         *,
@@ -57,8 +61,14 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('vendedor_id', vendedor.id)
-      .eq('status', 'aguardando_aceite')
       .order('created_at', { ascending: false });
+
+    // Se não for 'all', filtrar apenas pendentes
+    if (!all) {
+      query = query.eq('status', 'aguardando_aceite');
+    }
+
+    const { data: transferencias, error } = await query;
 
     if (error) {
       console.error('Erro ao buscar transferências:', error);

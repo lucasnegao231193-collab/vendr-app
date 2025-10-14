@@ -50,7 +50,7 @@ export default function VendedorEstoquePage() {
         .from('vendedor_estoque')
         .select(`
           *,
-          produto:produtos(id, nome, sku, preco)
+          produto:produtos(id, nome, preco)
         `)
         .eq('vendedor_id', vendedor.id)
         .gt('quantidade', 0);

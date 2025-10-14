@@ -28,7 +28,7 @@ export default function TransferenciasRecebidasPage() {
 
   const loadTransferencias = async () => {
     try {
-      const response = await fetch('/api/transferencias/vendedor');
+      const response = await fetch('/api/transferencias/vendedor?all=true');
       if (!response.ok) throw new Error('Erro ao carregar');
       
       const data = await response.json();
