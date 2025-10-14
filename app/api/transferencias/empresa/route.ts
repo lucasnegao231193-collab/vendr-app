@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
           produto_id,
           quantidade,
           preco_unit,
-          produto:produtos(id, nome, sku)
+          produto:produtos(id, nome)
         )
       `)
       .eq('empresa_id', perfil.empresa_id)
