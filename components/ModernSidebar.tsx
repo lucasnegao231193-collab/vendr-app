@@ -43,26 +43,32 @@ const navItems: NavItem[] = [
     role: ["owner", "admin"],
   },
   {
-    label: "Vendedores",
-    href: "/vendedores",
-    icon: Users,
-    role: ["owner", "admin"],
-  },
-  {
     label: "Estoque",
     href: "/estoque",
     icon: Package,
     role: ["owner", "admin"],
   },
   {
-    label: "Operações",
-    href: "/operacoes",
-    icon: GitBranch,
+    label: "Produtos",
+    href: "/produtos",
+    icon: Package,
+    role: ["owner", "admin"],
+  },
+  {
+    label: "Vendas",
+    href: "/vendas",
+    icon: ShoppingCart,
+    role: ["owner", "admin"],
+  },
+  {
+    label: "Vendedores",
+    href: "/vendedores",
+    icon: Users,
     role: ["owner", "admin"],
   },
   {
     label: "Transferências",
-    href: "/empresa/transferencias",
+    href: "/transferencias",
     icon: ArrowLeftRight,
     role: ["owner", "admin"],
   },
@@ -137,14 +143,14 @@ export function ModernSidebar({ userRole = "owner", className }: ModernSidebarPr
       animate={{ width: isCollapsed ? 64 : 240 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className={cn(
-        "relative h-screen bg-white dark:bg-trust-blue-800",
-        "border-r border-gray-200 dark:border-trust-blue-700",
+        "relative h-screen bg-[#0f172a]",
+        "border-r border-white/10",
         "flex flex-col",
         className
       )}
     >
       {/* Header com Toggle */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-trust-blue-700">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
         <AnimatePresence mode="wait">
           {!isCollapsed && (
             <motion.div
@@ -197,18 +203,11 @@ export function ModernSidebar({ userRole = "owner", className }: ModernSidebarPr
                     "transition-all duration-200",
                     "group relative",
                     active
-                      ? "bg-venlo-orange-100 dark:bg-venlo-orange-900/20 text-venlo-orange-600 dark:text-venlo-orange-500"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-trust-blue-700"
+                      ? "bg-primary text-white shadow-lg"
+                      : "text-white/70 hover:bg-white/10 hover:text-white"
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      "h-5 w-5 shrink-0",
-                      active
-                        ? "text-venlo-orange-600 dark:text-venlo-orange-500"
-                        : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300"
-                    )}
-                  />
+                  <Icon className="h-5 w-5 shrink-0" />
 
                   <AnimatePresence mode="wait">
                     {!isCollapsed && (
@@ -244,14 +243,14 @@ export function ModernSidebar({ userRole = "owner", className }: ModernSidebarPr
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-trust-blue-700">
+      <div className="p-4 border-t border-white/10">
         <AnimatePresence mode="wait">
           {!isCollapsed && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-xs text-gray-500 dark:text-gray-400 text-center"
+              className="text-xs text-white/60 text-center"
             >
               Venlo SaaS v2.0
             </motion.div>

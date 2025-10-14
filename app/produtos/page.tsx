@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import { EmpresaLayout } from "@/components/EmpresaLayout";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -170,14 +170,14 @@ export default function ProdutosPage() {
 
   if (loading) {
     return (
-      <EmpresaLayout>
+      <AuthenticatedLayout requiredRole="owner">
         <div className="p-8">Carregando...</div>
-      </EmpresaLayout>
+      </AuthenticatedLayout>
     );
   }
 
   return (
-    <EmpresaLayout>
+    <AuthenticatedLayout requiredRole="owner">
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
@@ -332,6 +332,6 @@ export default function ProdutosPage() {
         </Card>
       </div>
     </div>
-    </EmpresaLayout>
+    </AuthenticatedLayout>
   );
 }

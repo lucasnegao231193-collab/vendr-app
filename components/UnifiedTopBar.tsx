@@ -76,7 +76,7 @@ export function UnifiedTopBar({ userName, userRole }: UnifiedTopBarProps) {
         {/* Logo */}
         <div className="flex items-center gap-2 shrink-0">
           <Image
-            src="/vendr-logo-v3.png"
+            src="/vendr-white-v3.png"
             alt="Venlo"
             width={120}
             height={40}
