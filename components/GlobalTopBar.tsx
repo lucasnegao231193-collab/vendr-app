@@ -60,7 +60,7 @@ export function GlobalTopBar({ userName, avatarUrl, role = 'owner' }: GlobalTopB
   const displayName = userName || user?.email?.split('@')[0] || 'Usuário';
   const initials = displayName
     .split(' ')
-    .map(n => n[0])
+    .map((n: string) => n[0])
     .join('')
     .substring(0, 2)
     .toUpperCase();

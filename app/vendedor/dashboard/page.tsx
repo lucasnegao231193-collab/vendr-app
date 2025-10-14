@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { GlobalTopBar } from "@/components/GlobalTopBar";
 import { formatCurrency } from "@/lib/utils";
 import {
   Target,
@@ -126,10 +127,12 @@ export default function VendedorDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+    <div className="min-h-screen bg-background">
+      <GlobalTopBar />
+      
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div>
+        <div className="mb-8">
           <h1 className="text-3xl font-bold">Meu Dashboard</h1>
           <p className="text-muted-foreground">
             Acompanhe seu desempenho e metas

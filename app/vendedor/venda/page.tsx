@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProductGrid } from "@/components/ProductGrid";
 import { PixModal } from "@/components/PixModal";
+import { GlobalTopBar } from "@/components/GlobalTopBar";
 import { useToast } from "@/components/ui/use-toast";
 import { useOfflineSync } from "@/store/offlineQueue";
 import { formatCurrency } from "@/lib/utils";
@@ -221,11 +222,13 @@ export default function VendaPage() {
   const temItens = Object.values(quantidades).some((q) => q > 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 pb-24">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <GlobalTopBar />
+      
+      <div className="container mx-auto px-4 py-8 pb-24 max-w-6xl">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="ghost" size="icon" onClick={() => router.push('/vendedor')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl font-bold">Nova Venda</h1>
