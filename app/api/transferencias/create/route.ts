@@ -78,13 +78,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Verificar estoque disponível para cada produto
+    // 4. Verificar estoque disponível para cada produto (da tabela estoques)
     const produtoIds = validated.itens.map((item) => item.produtoId);
-    const { data: produtosEstoque, error: estoqueError } = await supabase
-      .from('produtos')
-      .select('id, estoque_atual, preco, nome')
+    
+    // Buscar estoque da tabela estoques
+    const { data: estoquesData, error: estoqueError } = await supabase
+      .from('estoques')
+      .select(`
+        qtd,
+        produto_id,
+        produtos:produto_id (
+          id,
+          nome,
+          preco
+        )
+      `)
       .eq('empresa_id', perfil.empresa_id)
-      .in('id', produtoIds);
+      .in('produto_id', produtoIds);
 
     if (estoqueError) {
       return NextResponse.json(
@@ -95,11 +105,11 @@ export async function POST(request: NextRequest) {
 
     // Mapear estoque disponível
     const estoqueMap = new Map(
-      produtosEstoque?.map((p) => [p.id, p.estoque_atual]) || []
+      estoquesData?.map((e) => [e.produto_id, e.qtd]) || []
     );
     
     // Mapear preços
-    const precoMap = new Map(produtosEstoque?.map((p) => [p.id, p.preco]) || []);
+    const precoMap = new Map(estoquesData?.map((e: any) => [e.produto_id, e.produtos.preco]) || []);
 
     // Validar disponibilidade
     const produtosInsuficientes = validated.itens.filter(
@@ -170,16 +180,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6.3. Debitar estoque da empresa
+    // 6.3. Debitar estoque da empresa (tabela estoques)
     for (const item of validated.itens) {
       const estoqueAtual = estoqueMap.get(item.produtoId) || 0;
+      const novaQtd = estoqueAtual - item.quantidade;
+      
       const { error: updateError } = await supabase
-        .from('produtos')
-        .update({ estoque_atual: estoqueAtual - item.quantidade })
+        .from('estoques')
+        .update({ qtd: novaQtd })
         .eq('empresa_id', perfil.empresa_id)
-        .eq('id', item.produtoId);
+        .eq('produto_id', item.produtoId);
 
       if (updateError) {
+        console.error('Erro ao debitar estoque:', updateError);
         // Rollback
         await supabase.from('transferencias').delete().eq('id', transferencia.id);
         return NextResponse.json(
