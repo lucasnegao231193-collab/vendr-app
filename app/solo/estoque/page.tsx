@@ -52,9 +52,31 @@ export default function SoloEstoquePage() {
 
   const loadProdutos = async () => {
     try {
+      // Buscar empresa_id do usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('Usuário não autenticado');
+        setLoading(false);
+        return;
+      }
+
+      const { data: perfil } = await supabase
+        .from('perfis')
+        .select('empresa_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!perfil) {
+        console.error('Perfil não encontrado');
+        setLoading(false);
+        return;
+      }
+
+      // Buscar apenas produtos da empresa do usuário
       const { data, error } = await supabase
         .from('produtos')
         .select('*')
+        .eq('empresa_id', perfil.empresa_id)
         .order('nome');
 
       if (error) throw error;
