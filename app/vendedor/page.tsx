@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import { useOfflineQueue } from "@/store/offlineQueue";
 import { KitAceiteCard } from "@/components/KitAceiteCard";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import {
   ShoppingCart,
   Calculator,
@@ -127,6 +128,7 @@ export default function VendedorHomePage() {
 
   return (
     <VendedorLayout>
+      <OnboardingTour role="seller" />
       <div className="container mx-auto px-4 py-8 max-w-7xl space-y-6 pb-20">
         {/* Header */}
         <div className="flex items-center justify-between">

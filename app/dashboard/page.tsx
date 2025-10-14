@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase-browser";
 import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
 import { DashboardEmpresa } from "@/components/dashboards/DashboardEmpresa";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -95,6 +96,7 @@ export default function DashboardPage() {
 
   return (
     <AuthenticatedLayout requiredRole="owner">
+      <OnboardingTour role="owner" />
       {loading ? (
         <DashboardSkeleton />
       ) : (

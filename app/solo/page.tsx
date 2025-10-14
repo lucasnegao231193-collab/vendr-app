@@ -16,6 +16,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { motion } from "framer-motion";
 import { PlanoType } from "@/types/solo";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 export default function SoloDashboardPage() {
   const router = useRouter();
@@ -89,6 +90,7 @@ export default function SoloDashboardPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <OnboardingTour role="solo" />
       <Breadcrumbs />
 
         {/* Header */}

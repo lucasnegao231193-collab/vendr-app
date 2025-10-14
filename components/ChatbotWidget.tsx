@@ -104,7 +104,7 @@ export function ChatbotWidget() {
     <>
       {/* Botão Flutuante */}
       <motion.div
-        className="fixed bottom-6 right-6 lg:bottom-6 sm:bottom-24 z-50"
+        className="fixed bottom-6 right-6 lg:bottom-6 sm:bottom-24 z-50 venlo-chat-button"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
