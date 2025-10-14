@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
+import { EmpresaLayout } from "@/components/EmpresaLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -168,11 +169,16 @@ export default function ProdutosPage() {
   });
 
   if (loading) {
-    return <div className="p-8">Carregando...</div>;
+    return (
+      <EmpresaLayout>
+        <div className="p-8">Carregando...</div>
+      </EmpresaLayout>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <EmpresaLayout>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Produtos</h1>
@@ -326,5 +332,6 @@ export default function ProdutosPage() {
         </Card>
       </div>
     </div>
+    </EmpresaLayout>
   );
 }
