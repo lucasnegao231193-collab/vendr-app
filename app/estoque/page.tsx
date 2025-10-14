@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { EmpresaLayout } from "@/components/EmpresaLayout";
 import { SkeletonTable } from "@/components/ui/SkeletonTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -230,7 +230,7 @@ export default function EstoquePage() {
   };
 
   return (
-    <AuthenticatedLayout requiredRole="owner">
+    <EmpresaLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -450,6 +450,6 @@ export default function EstoquePage() {
           }}
         />
       </div>
-    </AuthenticatedLayout>
+    </EmpresaLayout>
   );
 }

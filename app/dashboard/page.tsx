@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { EmpresaLayout } from "@/components/EmpresaLayout";
 import { DashboardEmpresa } from "@/components/dashboards/DashboardEmpresa";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 
@@ -64,9 +64,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <AuthenticatedLayout requiredRole="owner">
+      <EmpresaLayout>
         <DashboardSkeleton />
-      </AuthenticatedLayout>
+      </EmpresaLayout>
     );
   }
 
@@ -94,11 +94,12 @@ export default function DashboardPage() {
   };
 
   return (
-    <AuthenticatedLayout requiredRole="owner">
-      <DashboardEmpresa
-        metrics={metrics}
-        topVendedores={topVendedores}
-      />
-    </AuthenticatedLayout>
+    <EmpresaLayout>
+      {loading ? (
+        <DashboardSkeleton />
+      ) : (
+        <DashboardEmpresa metrics={metrics} topVendedores={topVendedores} />
+      )}
+    </EmpresaLayout>
   );
 }
