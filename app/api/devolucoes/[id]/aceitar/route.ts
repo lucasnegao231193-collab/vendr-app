@@ -22,6 +22,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('========================================');
+    console.log('🔄 INICIANDO ACEITE DE DEVOLUÇÃO');
+    console.log('Devolução ID:', params.id);
+    console.log('========================================');
+    
     const cookieStore = cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
