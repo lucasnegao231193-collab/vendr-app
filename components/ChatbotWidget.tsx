@@ -20,10 +20,46 @@ interface Message {
 
 const quickMessages = [
   "Como fazer uma transferência?",
-  "Dúvidas sobre vendedores",
-  "Problemas técnicos",
-  "Falar com suporte",
+  "Como adicionar vendedores?",
+  "Como gerenciar estoque?",
+  "Como aceitar devoluções?",
 ];
+
+// Base de conhecimento do chatbot
+const knowledgeBase: Record<string, string> = {
+  transferencia: "Para fazer uma transferência:\n1. Vá em 'Transferências' no menu\n2. Clique em 'Nova Transferência'\n3. Selecione o vendedor\n4. Escolha os produtos e quantidades\n5. Clique em 'Enviar Transferência'\n\nO vendedor receberá uma notificação e poderá aceitar ou recusar.",
+  vendedor: "Para adicionar vendedores:\n1. Acesse 'Vendedores' no menu\n2. Clique em '+ Novo Vendedor'\n3. Preencha nome, email e telefone\n4. Defina se está ativo\n5. Salve\n\nO vendedor receberá um convite por email para criar sua conta.",
+  estoque: "Para gerenciar estoque:\n1. Vá em 'Estoque' no menu\n2. Clique em '+ Adicionar Produto'\n3. Preencha nome, marca, preço e quantidade\n4. Salve\n\nVocê pode editar ou remover produtos a qualquer momento.",
+  devolucao: "Para aceitar devoluções:\n1. Acesse 'Devoluções' no menu\n2. Veja as devoluções pendentes\n3. Clique em 'Aceitar' ou 'Recusar'\n4. Se aceitar, o produto volta automaticamente ao seu estoque\n\nO vendedor será notificado da decisão.",
+  meta: "Os vendedores podem configurar suas próprias metas:\n1. Vendedor acessa 'Minhas Metas'\n2. Clica em 'Configurar Meta'\n3. Define a data e valor desejado\n4. Salva\n\nAs metas ajudam a acompanhar o desempenho diário e mensal.",
+  venda: "Para registrar vendas:\n1. Vendedor acessa 'Nova Venda'\n2. Seleciona os produtos\n3. Define quantidades\n4. Escolhe forma de pagamento (PIX, Dinheiro, Cartão)\n5. Confirma a venda\n\nA venda é registrada automaticamente no sistema.",
+  default: "Desculpe, não entendi sua pergunta. Você pode:\n\n• Escolher uma das perguntas frequentes acima\n• Reformular sua pergunta\n• Falar com nosso suporte humano pelo WhatsApp\n\nEstou aqui para ajudar! 😊"
+};
+
+function getAIResponse(userMessage: string): string {
+  const message = userMessage.toLowerCase();
+  
+  if (message.includes('transferência') || message.includes('transferencia') || message.includes('transferir')) {
+    return knowledgeBase.transferencia;
+  }
+  if (message.includes('vendedor') || message.includes('vendedores') || message.includes('adicionar')) {
+    return knowledgeBase.vendedor;
+  }
+  if (message.includes('estoque') || message.includes('produto') || message.includes('produtos')) {
+    return knowledgeBase.estoque;
+  }
+  if (message.includes('devolução') || message.includes('devolucao') || message.includes('devolver')) {
+    return knowledgeBase.devolucao;
+  }
+  if (message.includes('meta') || message.includes('metas') || message.includes('objetivo')) {
+    return knowledgeBase.meta;
+  }
+  if (message.includes('venda') || message.includes('vendas') || message.includes('vender')) {
+    return knowledgeBase.venda;
+  }
+  
+  return knowledgeBase.default;
+}
 
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,23 +87,24 @@ export function ChatbotWidget() {
     setMessages((prev) => [...prev, newMessage]);
     setInputValue("");
 
-    // Simular resposta do bot
+    // Resposta inteligente do bot com IA
     setTimeout(() => {
+      const aiResponse = getAIResponse(text);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Obrigado pela sua mensagem! Nossa equipe vai responder em breve.",
+        text: aiResponse,
         sender: "bot",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, botMessage]);
-    }, 1000);
+    }, 800);
   };
 
   return (
     <>
       {/* Botão Flutuante */}
       <motion.div
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed bottom-6 right-6 lg:bottom-6 sm:bottom-24 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
