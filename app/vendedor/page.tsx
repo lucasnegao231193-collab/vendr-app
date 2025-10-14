@@ -21,6 +21,9 @@ import {
   TrendingUp,
   WifiOff,
   Wifi,
+  Target,
+  PackageSearch,
+  LayoutDashboard,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -210,6 +213,47 @@ export default function VendedorHomePage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Menu de Navegação */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LayoutDashboard className="h-5 w-5" />
+              Acesso Rápido
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Link href="/vendedor/dashboard">
+                <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                  <LayoutDashboard className="h-6 w-6" />
+                  <span className="text-sm">Dashboard</span>
+                </Button>
+              </Link>
+              
+              <Link href="/vendedor/estoque">
+                <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                  <Package className="h-6 w-6" />
+                  <span className="text-sm">Meu Estoque</span>
+                </Button>
+              </Link>
+              
+              <Link href="/vendedor/transferencias-recebidas">
+                <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                  <PackageSearch className="h-6 w-6" />
+                  <span className="text-sm">Transferências</span>
+                </Button>
+              </Link>
+              
+              <Link href="/vendedor/metas">
+                <Button variant="outline" className="w-full h-20 flex-col gap-2">
+                  <Target className="h-6 w-6" />
+                  <span className="text-sm">Minhas Metas</span>
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Kit do dia */}
         {kit && (
