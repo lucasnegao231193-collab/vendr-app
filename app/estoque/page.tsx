@@ -92,27 +92,39 @@ export default function EstoquePage() {
 
       if (!perfil) return;
 
-      // Buscar produtos da empresa (usando tabela produtos diretamente)
+      // Buscar estoque da tabela estoques (não produtos)
       const { data, error } = await supabase
-        .from("produtos")
-        .select("id, nome, marca, preco, unidade, ativo, estoque_atual")
+        .from("estoques")
+        .select(`
+          id,
+          produto_id,
+          qtd,
+          produtos:produto_id (
+            id,
+            nome,
+            marca,
+            preco,
+            unidade,
+            ativo
+          )
+        `)
         .eq("empresa_id", perfil.empresa_id)
-        .order("estoque_atual", { ascending: true });
+        .order("qtd", { ascending: true });
 
       if (error) throw error;
 
       // Transformar para o formato esperado
-      const estoqueFormatado = data?.map((p: any) => ({
-        id: p.id,
-        produto_id: p.id,
-        qtd: p.estoque_atual || 0,
+      const estoqueFormatado = data?.map((e: any) => ({
+        id: e.id,
+        produto_id: e.produto_id,
+        qtd: e.qtd || 0,
         produtos: {
-          id: p.id,
-          nome: p.nome,
-          marca: p.marca,
-          preco: p.preco,
-          unidade: p.unidade,
-          ativo: p.ativo,
+          id: e.produtos.id,
+          nome: e.produtos.nome,
+          marca: e.produtos.marca,
+          preco: e.produtos.preco,
+          unidade: e.produtos.unidade,
+          ativo: e.produtos.ativo,
         },
       })) || [];
 
