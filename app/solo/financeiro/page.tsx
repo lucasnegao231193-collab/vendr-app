@@ -1,22 +1,39 @@
 /**
- * Financeiro - Modo Solo
- * Resumo financeiro e fechamento de caixa
+ * Financeiro + Caixa - Modo Solo
+ * Controle financeiro unificado com gestão de caixa
  */
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { ExportButtons } from "@/components/ExportButtons";
 import { formatCurrency } from "@/lib/utils";
-import { DollarSign, TrendingUp, CreditCard, Smartphone, Calendar } from "lucide-react";
+import { 
+  DollarSign, 
+  TrendingUp, 
+  TrendingDown,
+  CreditCard, 
+  Smartphone, 
+  Wallet,
+  Lock,
+  Unlock,
+  Calendar
+} from "lucide-react";
 import { motion } from "framer-motion";
-import { TableSkeleton } from "@/components/LoadingSkeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import type { Caixa } from "@/types/caixa";
 
 interface ResumoFinanceiro {
   total: number;
@@ -27,7 +44,6 @@ interface ResumoFinanceiro {
 }
 
 export default function SoloFinanceiroPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const supabase = createClient();
   
@@ -41,14 +57,60 @@ export default function SoloFinanceiroPage() {
     vendas: 0,
   });
 
+  // Estados do Caixa
+  const [caixaAtual, setCaixaAtual] = useState<Caixa | null>(null);
+  const [resumoCaixa, setResumoCaixa] = useState<any>(null);
+  const [showAbrirDialog, setShowAbrirDialog] = useState(false);
+  const [showFecharDialog, setShowFecharDialog] = useState(false);
+  const [saldoInicial, setSaldoInicial] = useState('');
+  const [saldoFechamento, setSaldoFechamento] = useState('');
+
   useEffect(() => {
-    loadResumo();
+    loadDados();
   }, [periodo]);
+
+  const loadDados = async () => {
+    setLoading(true);
+    await Promise.all([
+      loadResumo(),
+      loadCaixaAtual(),
+    ]);
+    setLoading(false);
+  };
+
+  const loadCaixaAtual = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const response = await fetch(`/api/caixa?user_id=${user.id}&escopo=solo&status=Aberto`);
+      const data = await response.json();
+
+      if (data.caixas && data.caixas.length > 0) {
+        const caixa = data.caixas[0];
+        setCaixaAtual(caixa);
+        await loadResumoCaixa(caixa.id);
+      } else {
+        setCaixaAtual(null);
+        setResumoCaixa(null);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar caixa:', error);
+    }
+  };
+
+  const loadResumoCaixa = async (caixaId: string) => {
+    try {
+      const response = await fetch(`/api/caixa/${caixaId}`);
+      const data = await response.json();
+      setResumoCaixa(data.resumo);
+    } catch (error) {
+      console.error('Erro ao carregar resumo do caixa:', error);
+    }
+  };
 
   const loadResumo = async () => {
     try {
-      setLoading(true);
-      
       const hoje = new Date();
       let dataInicio = '';
       
@@ -122,219 +184,349 @@ export default function SoloFinanceiroPage() {
       });
     } catch (error) {
       console.error('Erro ao carregar resumo:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleFecharCaixa = () => {
-    toast({
-      title: "📋 Relatório gerado!",
-      description: "Funcionalidade de fechamento em desenvolvimento",
-    });
+  const handleAbrirCaixa = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const response = await fetch('/api/caixa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          escopo: 'solo',
+          saldo_inicial: parseFloat(saldoInicial) || 0,
+        }),
+      });
+
+      if (response.ok) {
+        toast({ title: "✓ Caixa aberto com sucesso!" });
+        setSaldoInicial('');
+        setShowAbrirDialog(false);
+        loadCaixaAtual();
+      } else {
+        const data = await response.json();
+        toast({
+          title: "Erro ao abrir caixa",
+          description: data.error,
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
-  const periodos = [
-    { id: 'hoje', label: 'Hoje', icon: Calendar },
-    { id: 'semana', label: 'Últimos 7 dias', icon: Calendar },
-    { id: 'mes', label: 'Último mês', icon: Calendar },
-  ];
+  const handleFecharCaixa = async () => {
+    if (!caixaAtual) return;
 
-  const metodosPagamento = [
-    {
-      id: 'pix',
-      label: 'PIX',
-      valor: resumo.pix,
-      icon: Smartphone,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-    },
-    {
-      id: 'cartao',
-      label: 'Cartão',
-      valor: resumo.cartao,
-      icon: CreditCard,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-    },
-    {
-      id: 'dinheiro',
-      label: 'Dinheiro',
-      valor: resumo.dinheiro,
-      icon: DollarSign,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-    },
-  ];
+    try {
+      const response = await fetch(`/api/caixa/${caixaAtual.id}/fechar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          saldo_fechamento: parseFloat(saldoFechamento),
+        }),
+      });
+
+      if (response.ok) {
+        toast({ title: "✓ Caixa fechado com sucesso!" });
+        setSaldoFechamento('');
+        setShowFecharDialog(false);
+        loadCaixaAtual();
+      } else {
+        const data = await response.json();
+        toast({
+          title: "Erro ao fechar caixa",
+          description: data.error,
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
-    return (
-      <div className="p-6">
-        <TableSkeleton />
-      </div>
-    );
+    return <div className="p-6">Carregando...</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
-        <Breadcrumbs />
-
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
-        >
-          <div>
-            <h1 className="text-3xl font-bold text-[#121212]">Financeiro</h1>
-            <p className="text-gray-600">Resumo das suas vendas</p>
-          </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Financeiro</h1>
+          <p className="text-muted-foreground">Resumo financeiro e controle de caixa</p>
+        </div>
+        {!caixaAtual ? (
           <Button
-            onClick={handleFecharCaixa}
-            className="bg-[#0057FF] hover:bg-[#0046CC] text-white"
+            onClick={() => setShowAbrirDialog(true)}
+            className="bg-green-600 hover:bg-green-700"
           >
-            <DollarSign className="h-4 w-4 mr-2" />
+            <Unlock className="h-4 w-4 mr-2" />
+            Abrir Caixa
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setShowFecharDialog(true)}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            <Lock className="h-4 w-4 mr-2" />
             Fechar Caixa
           </Button>
-        </motion.div>
+        )}
+      </div>
 
-        {/* Seletor de Período */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex gap-2">
-              {periodos.map((p) => (
-                <Button
-                  key={p.id}
-                  variant={periodo === p.id ? "default" : "outline"}
-                  onClick={() => setPeriodo(p.id as any)}
-                  className="flex-1"
-                >
-                  <p.icon className="h-4 w-4 mr-2" />
-                  {p.label}
-                </Button>
-              ))}
+      {/* Seção de Caixa */}
+      {caixaAtual && resumoCaixa && (
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Caixa Atual
+              </CardTitle>
+              <Badge className="bg-green-500">Aberto</Badge>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Geral */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <Card className="bg-gradient-to-br from-[#0057FF] to-[#FF6B00] text-white">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white/80 mb-2">Faturamento Total</p>
-                  <p className="text-5xl font-bold">
-                    {formatCurrency(resumo.total)}
-                  </p>
-                  <p className="text-white/80 mt-2">
-                    {resumo.vendas} venda(s) realizada(s)
-                  </p>
-                </div>
-                <TrendingUp className="h-20 w-20 opacity-20" />
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Por Método de Pagamento */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {metodosPagamento.map((metodo, index) => (
-            <motion.div
-              key={metodo.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`${metodo.bgColor} p-3 rounded-lg`}>
-                      <metodo.icon className={`h-6 w-6 ${metodo.color}`} />
-                    </div>
-                    <Badge>{metodo.label}</Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-1">Total em {metodo.label}</p>
-                  <p className={`text-2xl font-bold ${metodo.color}`}>
-                    {formatCurrency(metodo.valor)}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    {resumo.total > 0
-                      ? `${((metodo.valor / resumo.total) * 100).toFixed(1)}% do total`
-                      : '0% do total'}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Gráfico de Pizza (Placeholder) */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Distribuição por Método</CardTitle>
-            <ExportButtons
-              data={[
-                { metodo: 'PIX', valor: resumo.pix },
-                { metodo: 'Cartão', valor: resumo.cartao },
-                { metodo: 'Dinheiro', valor: resumo.dinheiro },
-                { metodo: 'TOTAL', valor: resumo.total },
-              ]}
-              filename={`financeiro-solo-${periodo}`}
-              title={`Financeiro Solo - ${periodo}`}
-              columns={[
-                { header: 'Método', key: 'metodo' },
-                { header: 'Valor (R$)', key: 'valor' },
-              ]}
-            />
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {metodosPagamento.map((metodo) => {
-                const percentual = resumo.total > 0
-                  ? (metodo.valor / resumo.total) * 100
-                  : 0;
-                
-                return (
-                  <div key={metodo.id}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{metodo.label}</span>
-                      <span className="text-sm text-gray-600">
-                        {formatCurrency(metodo.valor)} ({percentual.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${
-                          metodo.id === 'pix' ? 'bg-green-500' :
-                          metodo.id === 'cartao' ? 'bg-blue-500' :
-                          'bg-orange-500'
-                        }`}
-                        style={{ width: `${percentual}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-1">Saldo Inicial</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {formatCurrency(caixaAtual.saldo_inicial)}
+                </p>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                  <p className="text-sm text-muted-foreground">Entradas</p>
+                </div>
+                <p className="text-2xl font-bold text-green-600">
+                  {formatCurrency(resumoCaixa.total_entradas)}
+                </p>
+              </div>
+              <div className="p-4 bg-red-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingDown className="h-4 w-4 text-red-600" />
+                  <p className="text-sm text-muted-foreground">Saídas</p>
+                </div>
+                <p className="text-2xl font-bold text-red-600">
+                  {formatCurrency(resumoCaixa.total_saidas)}
+                </p>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-1">Saldo Teórico</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {formatCurrency(resumoCaixa.saldo_teorico)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Filtro de Período */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Período
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Button
+              variant={periodo === 'hoje' ? 'default' : 'outline'}
+              onClick={() => setPeriodo('hoje')}
+            >
+              Hoje
+            </Button>
+            <Button
+              variant={periodo === 'semana' ? 'default' : 'outline'}
+              onClick={() => setPeriodo('semana')}
+            >
+              Últimos 7 dias
+            </Button>
+            <Button
+              variant={periodo === 'mes' ? 'default' : 'outline'}
+              onClick={() => setPeriodo('mes')}
+            >
+              Último mês
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Resumo Financeiro */}
+      <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+        <CardContent className="p-6">
+          <p className="text-sm opacity-90 mb-2">Faturamento Total</p>
+          <p className="text-4xl font-bold mb-1">{formatCurrency(resumo.total)}</p>
+          <p className="text-sm opacity-75">{resumo.vendas} venda(s) realizada(s)</p>
+        </CardContent>
+      </Card>
+
+      {/* Distribuição por Método */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Smartphone className="h-5 w-5 text-green-600" />
+                  <Badge>PIX</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Total em PIX</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(resumo.pix)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {resumo.total > 0 ? `${((resumo.pix / resumo.total) * 100).toFixed(0)}% do total` : '0%'}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Dicas */}
-        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">
-              💡 Dica Financeira
-            </h3>
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              Mantenha um controle regular do seu caixa. Faça fechamentos diários para
-              acompanhar melhor o desempenho do seu negócio.
-            </p>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                  <Badge>Cartão</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Total em Cartão</p>
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(resumo.cartao)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {resumo.total > 0 ? `${((resumo.cartao / resumo.total) * 100).toFixed(0)}% do total` : '0%'}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-5 w-5 text-orange-600" />
+                  <Badge>Dinheiro</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Total em Dinheiro</p>
+                <p className="text-2xl font-bold text-orange-600">{formatCurrency(resumo.dinheiro)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {resumo.total > 0 ? `${((resumo.dinheiro / resumo.total) * 100).toFixed(0)}% do total` : '0%'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dialog Abrir Caixa */}
+      <Dialog open={showAbrirDialog} onOpenChange={setShowAbrirDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Abrir Caixa</DialogTitle>
+            <DialogDescription>Informe o saldo inicial do caixa</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="saldo_inicial">Saldo Inicial (R$)</Label>
+              <Input
+                id="saldo_inicial"
+                type="number"
+                step="0.01"
+                min="0"
+                value={saldoInicial}
+                onChange={(e) => setSaldoInicial(e.target.value)}
+                placeholder="0,00"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAbrirDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAbrirCaixa} className="bg-green-600 hover:bg-green-700">
+              Abrir Caixa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Fechar Caixa */}
+      <Dialog open={showFecharDialog} onOpenChange={setShowFecharDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Fechar Caixa</DialogTitle>
+            <DialogDescription>
+              Informe o saldo contado fisicamente
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {resumoCaixa && (
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-muted-foreground">Saldo Teórico</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {formatCurrency(resumoCaixa.saldo_teorico)}
+                </p>
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="saldo_fechamento">Saldo Contado (R$)</Label>
+              <Input
+                id="saldo_fechamento"
+                type="number"
+                step="0.01"
+                min="0"
+                value={saldoFechamento}
+                onChange={(e) => setSaldoFechamento(e.target.value)}
+                placeholder="0,00"
+              />
+            </div>
+
+            {saldoFechamento && resumoCaixa && (
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-muted-foreground">Diferença</p>
+                <p className={`text-xl font-bold ${
+                  parseFloat(saldoFechamento) - resumoCaixa.saldo_teorico >= 0
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}>
+                  {formatCurrency(parseFloat(saldoFechamento) - resumoCaixa.saldo_teorico)}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFecharDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleFecharCaixa} className="bg-red-600 hover:bg-red-700">
+              Fechar Caixa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

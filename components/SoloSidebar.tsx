@@ -52,14 +52,9 @@ const soloNavItems: NavItem[] = [
     icon: ShoppingCart,
   },
   {
-    label: "Caixa",
-    href: "/solo/caixa",
-    icon: Wallet,
-  },
-  {
     label: "Financeiro",
     href: "/solo/financeiro",
-    icon: DollarSign,
+    icon: Wallet,
   },
   {
     label: "Assinatura",
