@@ -332,5 +332,5 @@ COMMENT ON COLUMN caixas.escopo IS 'Tipo de caixa: empresa, vendedor ou solo';
 COMMENT ON COLUMN caixas.saldo_inicial IS 'Valor inicial ao abrir o caixa';
 COMMENT ON COLUMN caixas.saldo_fechamento IS 'Valor contado fisicamente ao fechar';
 
-COMMENT ON FUNCTION calcular_saldo_teorico IS 'Calcula saldo teórico: inicial + entradas - saídas';
-COMMENT ON FUNCTION existe_caixa_aberto IS 'Verifica se já existe caixa aberto para o escopo';
+COMMENT ON FUNCTION calcular_saldo_teorico(UUID) IS 'Calcula saldo teórico: inicial + entradas - saídas';
+COMMENT ON FUNCTION existe_caixa_aberto(TEXT, UUID, UUID, UUID) IS 'Verifica se já existe caixa aberto para o escopo';
