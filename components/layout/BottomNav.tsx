@@ -41,7 +41,15 @@ export function BottomNav({ role }: BottomNavProps) {
     { label: "Mais", href: "/configuracoes", icon: MoreHorizontal },
   ];
 
-  const items = role === 'owner' ? ownerItems : sellerItems;
+  const soloItems = [
+    { label: "Home", href: "/solo", icon: LayoutDashboard },
+    { label: "Serviços", href: "/solo/servicos", icon: Package },
+    { label: "Estoque", href: "/solo/estoque", icon: Package },
+    { label: "Vendas", href: "/solo/vendas", icon: Wallet },
+    { label: "Mais", href: "/solo/configuracoes", icon: MoreHorizontal },
+  ];
+
+  const items = role === 'owner' ? ownerItems : role === 'seller' ? sellerItems : soloItems;
 
   return (
     <>

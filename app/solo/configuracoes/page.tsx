@@ -11,14 +11,17 @@ import {
   Building2, 
   Palette, 
   Shield, 
-  MessageCircle
+  MessageCircle,
+  Bot
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ChatbotWidget } from "@/components/ChatbotWidget";
 
 export default function SoloConfiguracoesPage() {
   const [activeTab, setActiveTab] = useState("perfil");
+  const [showChatbot, setShowChatbot] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -142,19 +145,37 @@ export default function SoloConfiguracoesPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    <strong>E-mail:</strong> suporte@venlo.com.br
-                  </p>
-                  <p className="text-sm">
-                    <strong>WhatsApp:</strong> (13) 98140-1945
-                  </p>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm">
+                      <strong>E-mail:</strong> suporte@venlo.com.br
+                    </p>
+                    <p className="text-sm">
+                      <strong>WhatsApp:</strong> (13) 98140-1945
+                    </p>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <Button 
+                      onClick={() => setShowChatbot(!showChatbot)}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      <Bot className="h-5 w-5 mr-2" />
+                      {showChatbot ? 'Fechar Chat IA' : 'Falar com Assistente IA'}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                      Tire suas dúvidas com nosso assistente inteligente
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Chatbot Widget - Apenas quando ativado */}
+      {showChatbot && <ChatbotWidget />}
     </div>
   );
 }

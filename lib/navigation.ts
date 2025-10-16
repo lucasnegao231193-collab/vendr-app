@@ -5,7 +5,7 @@
 
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
-export type UserRole = 'owner' | 'seller';
+export type UserRole = 'owner' | 'seller' | 'solo';
 
 /**
  * Retorna a home page baseada no role do usuário
