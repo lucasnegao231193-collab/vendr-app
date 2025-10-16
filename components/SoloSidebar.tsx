@@ -79,6 +79,7 @@ export function SoloSidebar() {
       transition={{ duration: 0.3 }}
       className={cn(
         "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-[#0f172a] text-white border-r border-white/10 z-30 transition-all duration-300",
+        "hidden md:block", // Esconde no mobile
         collapsed ? "w-20" : "w-64"
       )}
     >

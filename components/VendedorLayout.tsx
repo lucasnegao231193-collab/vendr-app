@@ -17,7 +17,7 @@ export function VendedorLayout({ children }: VendedorLayoutProps) {
       <UnifiedTopBar userRole="seller" />
       <div className="flex pt-16">
         <VendedorSidebar />
-        <main className="flex-1 w-full">
+        <main className="flex-1 w-full lg:ml-64">
           {children}
         </main>
       </div>
