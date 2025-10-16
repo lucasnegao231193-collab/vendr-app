@@ -28,10 +28,11 @@ export async function GET(request: NextRequest) {
 
       if (!perfil) {
         // Novo usuário -> redirecionar para onboarding
+        const origin = requestUrl.origin;
         if (type === 'autonomo') {
-          return NextResponse.redirect(new URL('/onboarding/solo', request.url));
+          return NextResponse.redirect(`${origin}/onboarding/solo`);
         } else {
-          return NextResponse.redirect(new URL('/onboarding', request.url));
+          return NextResponse.redirect(`${origin}/onboarding`);
         }
       }
 
@@ -43,18 +44,19 @@ export async function GET(request: NextRequest) {
         .single();
 
       // Redirecionar baseado no role e tipo de empresa
+      const origin = requestUrl.origin;
       if (perfil.role === 'owner') {
         if (empresa?.is_solo) {
-          return NextResponse.redirect(new URL('/solo', request.url));
+          return NextResponse.redirect(`${origin}/solo`);
         } else {
-          return NextResponse.redirect(new URL('/dashboard', request.url));
+          return NextResponse.redirect(`${origin}/dashboard`);
         }
       } else if (perfil.role === 'seller') {
-        return NextResponse.redirect(new URL('/vendedor', request.url));
+        return NextResponse.redirect(`${origin}/vendedor`);
       }
     }
   }
 
   // Fallback
-  return NextResponse.redirect(new URL('/login', request.url));
+  return NextResponse.redirect(`${requestUrl.origin}/login`);
 }
