@@ -18,6 +18,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,11 @@ const soloNavItems: NavItem[] = [
     label: "Dashboard",
     href: "/solo",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Serviços",
+    href: "/solo/servicos",
+    icon: Wrench,
   },
   {
     label: "Estoque",
