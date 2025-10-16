@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Wrench,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,11 @@ const soloNavItems: NavItem[] = [
     label: "Vendas",
     href: "/solo/vendas",
     icon: ShoppingCart,
+  },
+  {
+    label: "Caixa",
+    href: "/solo/caixa",
+    icon: Wallet,
   },
   {
     label: "Financeiro",
