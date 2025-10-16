@@ -1,7 +1,7 @@
 /**
- * API: CRUD de Serviços (Modo Solo)
- * GET: Listar serviços do usuário
- * POST: Criar novo serviço
+ * API: CRUD de Catálogo de Serviços (Modo Solo)
+ * GET: Listar serviços do catálogo
+ * POST: Criar novo serviço no catálogo
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -17,10 +17,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const user_id = searchParams.get('user_id');
-    const status = searchParams.get('status');
     const categoria = searchParams.get('categoria');
-    const data_inicio = searchParams.get('data_inicio');
-    const data_fim = searchParams.get('data_fim');
+    const ativo = searchParams.get('ativo');
 
     if (!user_id) {
       return NextResponse.json(
@@ -30,44 +28,24 @@ export async function GET(request: NextRequest) {
     }
 
     let query = supabase
-      .from('solo_servicos')
+      .from('solo_servicos_catalogo')
       .select('*')
       .eq('user_id', user_id)
-      .order('data', { ascending: false });
+      .order('nome', { ascending: true });
 
     // Aplicar filtros
-    if (status) {
-      query = query.eq('status', status);
-    }
     if (categoria) {
       query = query.eq('categoria', categoria);
     }
-    if (data_inicio) {
-      query = query.gte('data', data_inicio);
-    }
-    if (data_fim) {
-      query = query.lte('data', data_fim);
+    if (ativo !== null && ativo !== undefined) {
+      query = query.eq('ativo', ativo === 'true');
     }
 
     const { data, error } = await query;
 
     if (error) throw error;
 
-    // Calcular estatísticas
-    const stats = {
-      total_servicos: data?.length || 0,
-      total_recebido: data
-        ?.filter(s => s.status === 'Pago')
-        .reduce((sum, s) => sum + (s.valor_unitario * s.quantidade), 0) || 0,
-      total_pendente: data
-        ?.filter(s => s.status === 'Pendente')
-        .reduce((sum, s) => sum + (s.valor_unitario * s.quantidade), 0) || 0,
-      total_concluido: data
-        ?.filter(s => s.status === 'Concluído')
-        .reduce((sum, s) => sum + (s.valor_unitario * s.quantidade), 0) || 0,
-    };
-
-    return NextResponse.json({ servicos: data, stats });
+    return NextResponse.json({ servicos: data || [] });
   } catch (error: any) {
     console.error('Erro ao buscar serviços:', error);
     return NextResponse.json(
@@ -86,14 +64,11 @@ export async function POST(request: NextRequest) {
       categoria,
       descricao,
       valor_unitario,
-      quantidade,
-      status,
-      data,
-      observacoes,
+      ativo = true,
     } = body;
 
     // Validações
-    if (!user_id || !nome || !categoria || !valor_unitario || !quantidade || !status || !data) {
+    if (!user_id || !nome || !categoria || valor_unitario === undefined) {
       return NextResponse.json(
         { error: 'Campos obrigatórios faltando' },
         { status: 400 }
@@ -107,25 +82,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (quantidade <= 0) {
-      return NextResponse.json(
-        { error: 'Quantidade deve ser maior que zero' },
-        { status: 400 }
-      );
-    }
-
     const { data: servico, error } = await supabase
-      .from('solo_servicos')
+      .from('solo_servicos_catalogo')
       .insert({
         user_id,
         nome,
         categoria,
         descricao,
         valor_unitario,
-        quantidade,
-        status,
-        data,
-        observacoes,
+        ativo,
       })
       .select()
       .single();
