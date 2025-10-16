@@ -30,10 +30,16 @@ export default function SoloOnboardingPage() {
   const handleGoogleSignup = async () => {
     try {
       setLoading(true);
+      
+      // Usar URL de produção ou desenvolvimento
+      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=autonomo`
+        : `${window.location.origin}/auth/callback?type=autonomo`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?type=autonomo`,
+          redirectTo: redirectUrl,
         },
       });
 
