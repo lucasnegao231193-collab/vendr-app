@@ -68,6 +68,7 @@ export default function OnboardingPage() {
           nome: nomeEmpresa,
           cnpj_cpf: cnpjCpf,
           telefone: telefone,
+          is_solo: false, // Empresa normal, não é autônomo
         })
         .select()
         .single();
