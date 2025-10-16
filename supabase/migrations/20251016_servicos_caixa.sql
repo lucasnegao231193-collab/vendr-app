@@ -101,18 +101,25 @@ CREATE INDEX idx_caixas_status ON caixas(status);
 CREATE INDEX idx_caixas_data_abertura ON caixas(data_abertura);
 CREATE INDEX idx_caixas_escopo_status ON caixas(escopo, status);
 
+-- Função imutável para extrair data
+CREATE OR REPLACE FUNCTION extract_date_immutable(ts TIMESTAMP WITH TIME ZONE)
+RETURNS DATE AS $$
+BEGIN
+  RETURN ts::date;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Índice único para garantir apenas 1 caixa aberto por escopo
--- Usando CAST para garantir imutabilidade
 CREATE UNIQUE INDEX idx_caixas_empresa_aberto 
-  ON caixas(empresa_id, (data_abertura::date)) 
+  ON caixas(empresa_id, extract_date_immutable(data_abertura)) 
   WHERE escopo = 'empresa' AND status = 'Aberto';
 
 CREATE UNIQUE INDEX idx_caixas_vendedor_aberto 
-  ON caixas(vendedor_id, (data_abertura::date)) 
+  ON caixas(vendedor_id, extract_date_immutable(data_abertura)) 
   WHERE escopo = 'vendedor' AND status = 'Aberto';
 
 CREATE UNIQUE INDEX idx_caixas_solo_aberto 
-  ON caixas(user_id, (data_abertura::date)) 
+  ON caixas(user_id, extract_date_immutable(data_abertura)) 
   WHERE escopo = 'solo' AND status = 'Aberto';
 
 -- RLS para caixas
@@ -313,21 +320,21 @@ BEGIN
     WHERE escopo = 'empresa' 
       AND empresa_id = p_empresa_id 
       AND status = 'Aberto'
-      AND data_abertura::date = CURRENT_DATE;
+      AND extract_date_immutable(data_abertura) = CURRENT_DATE;
   ELSIF p_escopo = 'vendedor' THEN
     SELECT COUNT(*) INTO v_count
     FROM caixas
     WHERE escopo = 'vendedor' 
       AND vendedor_id = p_vendedor_id 
       AND status = 'Aberto'
-      AND data_abertura::date = CURRENT_DATE;
+      AND extract_date_immutable(data_abertura) = CURRENT_DATE;
   ELSIF p_escopo = 'solo' THEN
     SELECT COUNT(*) INTO v_count
     FROM caixas
     WHERE escopo = 'solo' 
       AND user_id = p_user_id 
       AND status = 'Aberto'
-      AND data_abertura::date = CURRENT_DATE;
+      AND extract_date_immutable(data_abertura) = CURRENT_DATE;
   END IF;
   
   RETURN v_count > 0;
