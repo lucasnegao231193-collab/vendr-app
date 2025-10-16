@@ -194,6 +194,13 @@ export default function SoloVendaNovaPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Usuário não autenticado');
 
+        // Mapear método de pagamento para o formato do banco
+        const metodoPagamentoMap: Record<string, string> = {
+          'pix': 'PIX',
+          'cartao': 'Credito',
+          'dinheiro': 'Dinheiro',
+        };
+
         for (const [servico_id, quantidade] of itens) {
           const servico = servicos.find(s => s.id === servico_id);
           if (!servico) continue;
@@ -208,7 +215,7 @@ export default function SoloVendaNovaPage() {
               cliente_telefone: clienteTelefone || undefined,
               quantidade,
               valor_unitario: servico.valor_unitario,
-              metodo_pagamento: metodoPagamento,
+              metodo_pagamento: metodoPagamentoMap[metodoPagamento] || 'Outros',
             }),
           });
 
