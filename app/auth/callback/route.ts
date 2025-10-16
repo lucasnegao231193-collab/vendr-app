@@ -7,28 +7,49 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const type = requestUrl.searchParams.get('type') || 'empresa';
+  const error = requestUrl.searchParams.get('error');
+  const error_description = requestUrl.searchParams.get('error_description');
+
+  // Se houve erro no OAuth
+  if (error) {
+    console.error('OAuth Error:', error, error_description);
+    return NextResponse.redirect(`${requestUrl.origin}/login?error=${encodeURIComponent(error_description || error)}`);
+  }
 
   if (code) {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    
-    await supabase.auth.exchangeCodeForSession(code);
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
 
-    // Buscar perfil do usuário
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (user) {
-      const { data: perfil } = await supabase
+      if (sessionError) {
+        console.error('Session Exchange Error:', sessionError);
+        return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_failed`);
+      }
+
+      if (!sessionData.user) {
+        console.error('No user after session exchange');
+        return NextResponse.redirect(`${requestUrl.origin}/login?error=no_user`);
+      }
+
+      // Buscar perfil do usuário
+      const { data: perfil, error: perfilError } = await supabase
         .from('perfis')
         .select('role, empresa_id')
-        .eq('user_id', user.id)
+        .eq('user_id', sessionData.user.id)
         .single();
+
+      if (perfilError && perfilError.code !== 'PGRST116') {
+        console.error('Profile Fetch Error:', perfilError);
+      }
 
       if (!perfil) {
         // Novo usuário -> redirecionar para onboarding
         const origin = requestUrl.origin;
+        console.log('New user, redirecting to onboarding. Type:', type);
         if (type === 'autonomo') {
           return NextResponse.redirect(`${origin}/onboarding/solo`);
         } else {
@@ -54,9 +75,13 @@ export async function GET(request: NextRequest) {
       } else if (perfil.role === 'seller') {
         return NextResponse.redirect(`${origin}/vendedor`);
       }
+    } catch (error) {
+      console.error('Callback Error:', error);
+      return NextResponse.redirect(`${requestUrl.origin}/login?error=callback_failed`);
     }
   }
 
-  // Fallback
+  // Fallback - sem code
+  console.log('No code provided, redirecting to login');
   return NextResponse.redirect(`${requestUrl.origin}/login`);
 }
