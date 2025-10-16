@@ -113,8 +113,17 @@ export async function getSoloStats(empresaId: string): Promise<{
   
   const hoje = new Date().toISOString().split('T')[0];
   
-  // Vendas hoje
-  const { count: vendasHoje } = await supabase
+  // Obter user_id da empresa
+  const { data: perfil } = await supabase
+    .from('perfis')
+    .select('user_id')
+    .eq('empresa_id', empresaId)
+    .single();
+  
+  const userId = perfil?.user_id;
+
+  // Vendas de produtos hoje
+  const { count: vendasProdutosHoje } = await supabase
     .from('vendas')
     .select('*', { count: 'exact', head: true })
     .eq('empresa_id', empresaId)
@@ -122,7 +131,18 @@ export async function getSoloStats(empresaId: string): Promise<{
     .lte('data_hora', `${hoje}T23:59:59`)
     .eq('status', 'confirmado');
   
-  // Lucro estimado (soma dos valores)
+  // Vendas de serviços hoje
+  const { count: vendasServicosHoje } = await supabase
+    .from('vendas_servicos')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('data_venda', `${hoje}T00:00:00`)
+    .lte('data_venda', `${hoje}T23:59:59`)
+    .eq('status', 'Concluído');
+  
+  const vendasHoje = (vendasProdutosHoje || 0) + (vendasServicosHoje || 0);
+  
+  // Lucro de produtos
   const { data: vendas } = await supabase
     .from('vendas')
     .select('qtd, valor_unit')
@@ -131,10 +151,26 @@ export async function getSoloStats(empresaId: string): Promise<{
     .lte('data_hora', `${hoje}T23:59:59`)
     .eq('status', 'confirmado');
   
-  const lucroEstimado = (vendas || []).reduce(
+  const lucroProdutos = (vendas || []).reduce(
     (sum, v) => sum + (v.qtd * v.valor_unit),
     0
   );
+  
+  // Lucro de serviços
+  const { data: vendasServicos } = await supabase
+    .from('vendas_servicos')
+    .select('valor_total')
+    .eq('user_id', userId)
+    .gte('data_venda', `${hoje}T00:00:00`)
+    .lte('data_venda', `${hoje}T23:59:59`)
+    .eq('status', 'Concluído');
+  
+  const lucroServicos = (vendasServicos || []).reduce(
+    (sum, v) => sum + v.valor_total,
+    0
+  );
+  
+  const lucroEstimado = lucroProdutos + lucroServicos;
   
   // Produtos ativos
   const { count: produtosAtivos } = await supabase
@@ -159,7 +195,7 @@ export async function getSoloStats(empresaId: string): Promise<{
   const cota = await getSoloCotaAtual(empresaId);
   
   return {
-    vendasHoje: vendasHoje || 0,
+    vendasHoje,
     lucroEstimado,
     produtosAtivos: produtosAtivos || 0,
     estoqueTotal,

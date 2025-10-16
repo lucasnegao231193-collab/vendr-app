@@ -68,6 +68,7 @@ export default function SoloFinanceiroPage() {
           break;
       }
 
+      // Buscar vendas de produtos
       const { data: vendas, error } = await supabase
         .from('vendas')
         .select('qtd, valor_unit, meio_pagamento')
@@ -76,25 +77,48 @@ export default function SoloFinanceiroPage() {
 
       if (error) throw error;
 
-      // Calcular resumo
-      const totalVendas = vendas?.length || 0;
-      const total = (vendas || []).reduce((sum, v) => sum + (v.qtd * v.valor_unit), 0);
-      const pix = (vendas || [])
+      // Buscar vendas de serviços
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: vendasServicos } = await supabase
+        .from('vendas_servicos')
+        .select('valor_total, metodo_pagamento')
+        .eq('user_id', user?.id)
+        .gte('data_venda', `${dataInicio}T00:00:00`)
+        .eq('status', 'Concluído');
+
+      // Calcular resumo de produtos
+      const totalVendasProdutos = vendas?.length || 0;
+      const totalProdutos = (vendas || []).reduce((sum, v) => sum + (v.qtd * v.valor_unit), 0);
+      const pixProdutos = (vendas || [])
         .filter(v => v.meio_pagamento === 'pix')
         .reduce((sum, v) => sum + (v.qtd * v.valor_unit), 0);
-      const cartao = (vendas || [])
+      const cartaoProdutos = (vendas || [])
         .filter(v => v.meio_pagamento === 'cartao')
         .reduce((sum, v) => sum + (v.qtd * v.valor_unit), 0);
-      const dinheiro = (vendas || [])
+      const dinheiroProdutos = (vendas || [])
         .filter(v => v.meio_pagamento === 'dinheiro')
         .reduce((sum, v) => sum + (v.qtd * v.valor_unit), 0);
 
+      // Calcular resumo de serviços
+      const totalVendasServicos = vendasServicos?.length || 0;
+      const totalServicos = (vendasServicos || []).reduce((sum, v) => sum + v.valor_total, 0);
+      const pixServicos = (vendasServicos || [])
+        .filter(v => v.metodo_pagamento === 'PIX')
+        .reduce((sum, v) => sum + v.valor_total, 0);
+      const cartaoServicos = (vendasServicos || [])
+        .filter(v => v.metodo_pagamento === 'Credito' || v.metodo_pagamento === 'Debito')
+        .reduce((sum, v) => sum + v.valor_total, 0);
+      const dinheiroServicos = (vendasServicos || [])
+        .filter(v => v.metodo_pagamento === 'Dinheiro')
+        .reduce((sum, v) => sum + v.valor_total, 0);
+
+      // Somar tudo
       setResumo({
-        total,
-        pix,
-        cartao,
-        dinheiro,
-        vendas: totalVendas,
+        total: totalProdutos + totalServicos,
+        pix: pixProdutos + pixServicos,
+        cartao: cartaoProdutos + cartaoServicos,
+        dinheiro: dinheiroProdutos + dinheiroServicos,
+        vendas: totalVendasProdutos + totalVendasServicos,
       });
     } catch (error) {
       console.error('Erro ao carregar resumo:', error);
