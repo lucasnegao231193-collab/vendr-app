@@ -1,5 +1,6 @@
 /**
- * Página de Onboarding: criar empresa e perfil após primeiro login
+ * Página de Cadastro de Empresa
+ * Cria conta com email/senha e dados da empresa
  */
 "use client";
 
@@ -11,72 +12,66 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2, Chrome } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import Link from "next/link";
-import { getOAuthCallbackUrl } from "@/lib/auth-helpers";
 
 export default function OnboardingPage() {
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [cnpjCpf, setCnpjCpf] = useState("");
-  const [chavePix, setChavePix] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
 
   const supabase = createClient();
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleGoogleSignup = async () => {
-    try {
-      setLoading(true);
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: getOAuthCallbackUrl('empresa'),
-        },
-      });
-
-      if (error) throw error;
-    } catch (error: any) {
-      toast({
-        title: "Erro ao criar conta com Google",
-        description: error.message,
-        variant: "destructive",
-      });
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // 1. Criar usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
 
-      if (!user) throw new Error("Usuário não autenticado");
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Erro ao criar usuário");
 
-      // Criar empresa
+      // 2. Fazer login imediatamente
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: senha,
+      });
+
+      if (signInError) console.warn('Login após signup falhou:', signInError);
+
+      // 3. Criar empresa
       const { data: empresa, error: empresaError } = await supabase
         .from("empresas")
         .insert({
-          owner_id: user.id,
+          owner_id: authData.user.id,
           nome: nomeEmpresa,
           cnpj_cpf: cnpjCpf,
-          chave_pix: chavePix,
+          telefone: telefone,
         })
         .select()
         .single();
 
       if (empresaError) throw empresaError;
 
-      // Criar perfil
+      // 4. Criar perfil
       const { error: perfilError } = await supabase.from("perfis").insert({
-        user_id: user.id,
+        user_id: authData.user.id,
         empresa_id: empresa.id,
+        nome: nomeEmpresa,
         role: "owner",
       });
 
@@ -107,9 +102,9 @@ export default function OnboardingPage() {
           <div className="flex items-center justify-center w-full">
             <Logo size="md" />
           </div>
-          <CardTitle className="text-center">Configurar sua Empresa</CardTitle>
-          <CardDescription>
-            Configure os dados da sua empresa para começar a usar o Vendr
+          <CardTitle className="text-center">Criar Conta da Empresa</CardTitle>
+          <CardDescription className="text-center">
+            Preencha os dados para começar a usar o Vendr
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -127,53 +122,63 @@ export default function OnboardingPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cnpj">CNPJ/CPF</Label>
+              <Label htmlFor="cnpj">CNPJ/CPF *</Label>
               <Input
                 id="cnpj"
                 placeholder="00.000.000/0000-00"
                 value={cnpjCpf}
                 onChange={(e) => setCnpjCpf(e.target.value)}
+                required
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="pix">Chave PIX</Label>
+              <Label htmlFor="telefone">Telefone *</Label>
               <Input
-                id="pix"
-                placeholder="sua-chave@pix.com"
-                value={chavePix}
-                onChange={(e) => setChavePix(e.target.value)}
+                id="telefone"
+                type="tel"
+                placeholder="(00) 00000-0000"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                required
                 disabled={loading}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@empresa.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="senha">Senha *</Label>
+              <Input
+                id="senha"
+                type="password"
+                placeholder="••••••••"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+                disabled={loading}
+                minLength={6}
+              />
               <p className="text-xs text-muted-foreground">
-                Chave PIX para receber pagamentos dos clientes
+                Mínimo 6 caracteres
               </p>
             </div>
 
             <Button type="submit" className="w-full vendr-btn-primary" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Criar Empresa
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Ou</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleGoogleSignup}
-              disabled={loading}
-            >
-              <Chrome className="mr-2 h-4 w-4" />
-              Criar conta com Google
+              Criar Conta da Empresa
             </Button>
 
             <div className="text-center text-sm">

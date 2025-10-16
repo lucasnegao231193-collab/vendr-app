@@ -186,27 +186,7 @@ export default function LoginPage() {
                   Entrar como Empresa
                 </Button>
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Ou</span>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleGoogleLogin}
-                  disabled={loading}
-                >
-                  <Chrome className="mr-2 h-4 w-4" />
-                  Continuar com Google
-                </Button>
-
-                <div className="flex flex-col gap-2 text-center text-sm">
+                <div className="flex flex-col gap-2 text-center text-sm mt-4">
                   <Link href="/esqueci-senha" className="text-primary hover:underline">
                     Esqueci minha senha
                   </Link>
