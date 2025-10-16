@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Chrome } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import Link from "next/link";
+import { getOAuthCallbackUrl } from "@/lib/auth-helpers";
 
 export default function OnboardingPage() {
   const [nomeEmpresa, setNomeEmpresa] = useState("");
@@ -29,15 +30,10 @@ export default function OnboardingPage() {
     try {
       setLoading(true);
       
-      // Usar URL de produção ou desenvolvimento
-      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
-        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=empresa`
-        : `${window.location.origin}/auth/callback?type=empresa`;
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
+          redirectTo: getOAuthCallbackUrl('empresa'),
         },
       });
 

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Building2, UserCircle2, User, Chrome } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { getOAuthCallbackUrl } from "@/lib/auth-helpers";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -31,15 +32,10 @@ export default function LoginPage() {
     try {
       setLoading(true);
       
-      // Usar URL de produção ou desenvolvimento
-      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
-        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=${activeTab}`
-        : `${window.location.origin}/auth/callback?type=${activeTab}`;
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
+          redirectTo: getOAuthCallbackUrl(activeTab),
         },
       });
 

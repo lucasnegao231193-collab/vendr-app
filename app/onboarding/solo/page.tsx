@@ -16,6 +16,7 @@ import { Loader2, User, Chrome } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { soloOnboardingSchema } from "@/lib/solo-schemas";
 import Link from "next/link";
+import { getOAuthCallbackUrl } from "@/lib/auth-helpers";
 
 export default function SoloOnboardingPage() {
   const [email, setEmail] = useState("");
@@ -31,15 +32,10 @@ export default function SoloOnboardingPage() {
     try {
       setLoading(true);
       
-      // Usar URL de produção ou desenvolvimento
-      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
-        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=autonomo`
-        : `${window.location.origin}/auth/callback?type=autonomo`;
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
+          redirectTo: getOAuthCallbackUrl('autonomo'),
         },
       });
 
