@@ -39,25 +39,32 @@ export default function OnboardingPage() {
         password: senha,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            nome_empresa: nomeEmpresa,
+          }
         },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Erro ao criar usuário");
 
-      // 2. Fazer login imediatamente
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // 2. Aguardar um pouco para garantir que o usuário foi criado
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // 3. Fazer login para obter a sessão
+      const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password: senha,
       });
 
-      if (signInError) console.warn('Login após signup falhou:', signInError);
+      if (signInError) throw new Error(`Erro ao fazer login: ${signInError.message}`);
+      if (!sessionData.user) throw new Error("Usuário não encontrado após login");
 
-      // 3. Criar empresa
+      // 4. Criar empresa
       const { data: empresa, error: empresaError } = await supabase
         .from("empresas")
         .insert({
-          owner_id: authData.user.id,
+          owner_id: sessionData.user.id,
           nome: nomeEmpresa,
           cnpj_cpf: cnpjCpf,
           telefone: telefone,
@@ -65,29 +72,37 @@ export default function OnboardingPage() {
         .select()
         .single();
 
-      if (empresaError) throw empresaError;
+      if (empresaError) {
+        console.error('Erro ao criar empresa:', empresaError);
+        throw new Error(`Erro ao criar empresa: ${empresaError.message}`);
+      }
 
-      // 4. Criar perfil
+      // 5. Criar perfil
       const { error: perfilError } = await supabase.from("perfis").insert({
-        user_id: authData.user.id,
+        user_id: sessionData.user.id,
         empresa_id: empresa.id,
         nome: nomeEmpresa,
         role: "owner",
       });
 
-      if (perfilError) throw perfilError;
+      if (perfilError) {
+        console.error('Erro ao criar perfil:', perfilError);
+        throw new Error(`Erro ao criar perfil: ${perfilError.message}`);
+      }
 
       toast({
         title: "Empresa criada!",
         description: "Bem-vindo ao Vendr",
       });
 
+      // 6. Redirecionar para o dashboard
       router.push("/dashboard");
       router.refresh();
     } catch (error: any) {
+      console.error('Erro completo:', error);
       toast({
-        title: "Erro",
-        description: error.message || "Erro ao criar empresa",
+        title: "Erro ao criar empresa",
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     } finally {
