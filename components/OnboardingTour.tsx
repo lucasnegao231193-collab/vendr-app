@@ -289,6 +289,16 @@ export function OnboardingTour({ role }: OnboardingTourProps) {
         placement: "right",
       },
       {
+        target: '[href="/solo/servicos"]',
+        content: (
+          <div className="space-y-2">
+            <h3 className="font-bold">🔧 Serviços</h3>
+            <p>Cadastre e venda seus serviços! Ideal para prestadores de serviço.</p>
+          </div>
+        ),
+        placement: "right",
+      },
+      {
         target: ".venlo-chat-button",
         content: (
           <div className="space-y-2">
