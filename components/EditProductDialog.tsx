@@ -114,18 +114,28 @@ export function EditProductDialog({
 
       if (produto) {
         // EDITAR produto existente
+        // 1. Atualizar dados do produto
         const { error: produtoError } = await supabase
           .from("produtos")
           .update({
             nome: nome.trim(),
             marca: marca.trim() || null,
             preco: precoNum,
-            estoque_atual: qtdNum,
             ativo,
           })
           .eq("id", produto.produto_id);
 
         if (produtoError) throw produtoError;
+
+        // 2. Atualizar quantidade na tabela estoques
+        const { error: estoqueError } = await supabase
+          .from("estoques")
+          .update({
+            qtd: qtdNum,
+          })
+          .eq("id", produto.id);
+
+        if (estoqueError) throw estoqueError;
 
         toast({
           title: "Produto atualizado!",
@@ -133,19 +143,32 @@ export function EditProductDialog({
         });
       } else {
         // CRIAR novo produto
-        const { error: produtoError } = await supabase
+        // 1. Criar produto
+        const { data: novoProduto, error: produtoError } = await supabase
           .from("produtos")
           .insert({
             empresa_id: perfil.empresa_id,
             nome: nome.trim(),
             marca: marca.trim() || null,
             preco: precoNum,
-            estoque_atual: qtdNum,
             ativo,
             unidade: "un",
-          });
+          })
+          .select()
+          .single();
 
         if (produtoError) throw produtoError;
+
+        // 2. Criar registro na tabela estoques
+        const { error: estoqueError } = await supabase
+          .from("estoques")
+          .insert({
+            empresa_id: perfil.empresa_id,
+            produto_id: novoProduto.id,
+            qtd: qtdNum,
+          });
+
+        if (estoqueError) throw estoqueError;
 
         toast({
           title: "Produto criado!",
