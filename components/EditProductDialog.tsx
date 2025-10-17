@@ -159,16 +159,36 @@ export function EditProductDialog({
 
         if (produtoError) throw produtoError;
 
-        // 2. Criar registro na tabela estoques
-        const { error: estoqueError } = await supabase
+        // 2. Verificar se já existe estoque para este produto
+        const { data: estoqueExistente } = await supabase
           .from("estoques")
-          .insert({
-            empresa_id: perfil.empresa_id,
-            produto_id: novoProduto.id,
-            qtd: qtdNum,
-          });
+          .select("id, qtd")
+          .eq("empresa_id", perfil.empresa_id)
+          .eq("produto_id", novoProduto.id)
+          .single();
 
-        if (estoqueError) throw estoqueError;
+        if (estoqueExistente) {
+          // Atualizar quantidade existente
+          const { error: updateError } = await supabase
+            .from("estoques")
+            .update({
+              qtd: estoqueExistente.qtd + qtdNum,
+            })
+            .eq("id", estoqueExistente.id);
+
+          if (updateError) throw updateError;
+        } else {
+          // Criar novo registro na tabela estoques
+          const { error: estoqueError } = await supabase
+            .from("estoques")
+            .insert({
+              empresa_id: perfil.empresa_id,
+              produto_id: novoProduto.id,
+              qtd: qtdNum,
+            });
+
+          if (estoqueError) throw estoqueError;
+        }
 
         toast({
           title: "Produto criado!",
