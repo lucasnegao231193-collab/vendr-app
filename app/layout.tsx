@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "./providers";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { InstallPWA } from "@/components/InstallPWA";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -14,8 +15,25 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Venlo - Gestão de Vendas Externas",
-  description: "Sistema completo para gestão de vendas ambulantes com Trust Blue Design",
+  description: "Sistema completo para gestão de vendas ambulantes. Funciona 100% offline com sincronização automática.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Venlo",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport = {
@@ -23,7 +41,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#0D1B2A", // Trust Blue 900
+  themeColor: "#415A77", // Trust Blue 500
 };
 
 export default function RootLayout({
@@ -34,13 +52,19 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Venlo" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider defaultTheme="system" storageKey="venlo-theme">
           <Providers>
             {children}
             <Toaster />
+            <InstallPWA />
           </Providers>
         </ThemeProvider>
       </body>

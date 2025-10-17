@@ -263,7 +263,7 @@ export default function SoloVendaNovaPage() {
   ];
 
   return (
-    <div className="p-6 pb-32 space-y-6">
+    <div className="p-6 pb-48 md:pb-32 space-y-6">
         <Breadcrumbs />
 
         <motion.div
@@ -507,7 +507,7 @@ export default function SoloVendaNovaPage() {
           <motion.div
             initial={{ y: 100 }}
             animate={{ y: 0 }}
-            className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-4 shadow-lg z-40"
+            className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-4 shadow-lg z-50"
           >
             <div className="max-w-6xl mx-auto space-y-4">
               {/* Métodos de Pagamento */}
