@@ -106,29 +106,64 @@ export async function POST(
 
     // 2. Adicionar itens ao estoque do vendedor
     for (const item of transferencia.itens) {
+      console.log('🔍 Processando item:', {
+        produto_id: item.produto_id,
+        quantidade: item.quantidade,
+        vendedor_id: vendedor.id
+      });
+
       // Verificar se já existe estoque para este produto
-      const { data: estoqueExistente } = await supabase
+      const { data: estoqueExistente, error: selectError } = await supabase
         .from('vendedor_estoque')
         .select('id, quantidade')
         .eq('vendedor_id', vendedor.id)
         .eq('produto_id', item.produto_id)
         .single();
 
+      if (selectError && selectError.code !== 'PGRST116') {
+        console.error('❌ Erro ao buscar estoque:', selectError);
+      }
+
       if (estoqueExistente) {
         // Atualizar quantidade
-        await supabase
+        const novaQuantidade = estoqueExistente.quantidade + item.quantidade;
+        console.log('✏️ Atualizando estoque existente:', {
+          antiga: estoqueExistente.quantidade,
+          adicionar: item.quantidade,
+          nova: novaQuantidade
+        });
+
+        const { error: updateError } = await supabase
           .from('vendedor_estoque')
           .update({
-            quantidade: estoqueExistente.quantidade + item.quantidade,
+            quantidade: novaQuantidade,
           })
           .eq('id', estoqueExistente.id);
+
+        if (updateError) {
+          console.error('❌ Erro ao atualizar estoque:', updateError);
+          throw updateError;
+        }
       } else {
         // Criar novo registro
-        await supabase.from('vendedor_estoque').insert({
+        console.log('➕ Criando novo registro de estoque:', {
           vendedor_id: vendedor.id,
           produto_id: item.produto_id,
-          quantidade: item.quantidade,
+          quantidade: item.quantidade
         });
+
+        const { error: insertError } = await supabase
+          .from('vendedor_estoque')
+          .insert({
+            vendedor_id: vendedor.id,
+            produto_id: item.produto_id,
+            quantidade: item.quantidade,
+          });
+
+        if (insertError) {
+          console.error('❌ Erro ao inserir estoque:', insertError);
+          throw insertError;
+        }
       }
     }
 
