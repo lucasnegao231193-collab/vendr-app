@@ -3,16 +3,25 @@
  */
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 
-if (!process.env.MERCADOPAGO_ACCESS_TOKEN) {
-  throw new Error('MERCADOPAGO_ACCESS_TOKEN não está definida');
+// Mercado Pago é opcional - só será usado se o token estiver configurado
+const MERCADOPAGO_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN || '';
+
+const client = MERCADOPAGO_ACCESS_TOKEN 
+  ? new MercadoPagoConfig({
+      accessToken: MERCADOPAGO_ACCESS_TOKEN,
+    })
+  : null;
+
+const preferenceClient = client ? new Preference(client) : null;
+const paymentClient = client ? new Payment(client) : null;
+
+// Helper para verificar se Mercado Pago está configurado
+function ensureMP() {
+  if (!preferenceClient || !paymentClient) {
+    throw new Error('Mercado Pago não está configurado. Configure MERCADOPAGO_ACCESS_TOKEN nas variáveis de ambiente.');
+  }
+  return { preferenceClient, paymentClient };
 }
-
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
-});
-
-const preferenceClient = new Preference(client);
-const paymentClient = new Payment(client);
 
 /**
  * Criar preferência de pagamento (assinatura)
@@ -39,7 +48,9 @@ export async function createSubscriptionPreference({
   };
   metadata?: Record<string, any>;
 }) {
-  const preference = await preferenceClient.create({
+  const { preferenceClient: mpClient } = ensureMP();
+  // @ts-ignore - Mercado Pago SDK tem tipagem incompleta
+  const preference = await mpClient.create({
     body: {
       reason,
       auto_recurring: {
@@ -82,7 +93,9 @@ export async function createPaymentPreference({
   };
   metadata?: Record<string, any>;
 }) {
-  const preference = await preferenceClient.create({
+  const { preferenceClient: mpClient } = ensureMP();
+  // @ts-ignore - Mercado Pago SDK tem tipagem incompleta
+  const preference = await mpClient.create({
     body: {
       items,
       payer,
@@ -99,7 +112,8 @@ export async function createPaymentPreference({
  * Buscar informações de pagamento
  */
 export async function getPayment(paymentId: string) {
-  const payment = await paymentClient.get({ id: paymentId });
+  const { paymentClient: mpClient } = ensureMP();
+  const payment = await mpClient.get({ id: paymentId });
   return payment;
 }
 

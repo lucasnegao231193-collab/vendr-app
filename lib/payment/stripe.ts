@@ -3,14 +3,23 @@
  */
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY não está definida');
-}
+// Stripe é opcional - só será usado se a chave estiver configurada
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
-  typescript: true,
-});
+export const stripe = STRIPE_SECRET_KEY 
+  ? new Stripe(STRIPE_SECRET_KEY, {
+      apiVersion: '2025-09-30.clover',
+      typescript: true,
+    })
+  : null;
+
+// Helper para verificar se Stripe está configurado
+function ensureStripe(): Stripe {
+  if (!stripe) {
+    throw new Error('Stripe não está configurado. Configure STRIPE_SECRET_KEY nas variáveis de ambiente.');
+  }
+  return stripe;
+}
 
 /**
  * Criar sessão de checkout
@@ -28,7 +37,8 @@ export async function createCheckoutSession({
   cancelUrl: string;
   metadata?: Record<string, string>;
 }) {
-  const session = await stripe.checkout.sessions.create({
+  const stripeClient = ensureStripe();
+  const session = await stripeClient.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'],
     line_items: [
@@ -61,7 +71,8 @@ export async function createCustomer({
   name?: string;
   metadata?: Record<string, string>;
 }) {
-  const customer = await stripe.customers.create({
+  const stripeClient = ensureStripe();
+  const customer = await stripeClient.customers.create({
     email,
     name,
     metadata,
@@ -80,7 +91,8 @@ export async function createCustomerPortal({
   customerId: string;
   returnUrl: string;
 }) {
-  const session = await stripe.billingPortal.sessions.create({
+  const stripeClient = ensureStripe();
+  const session = await stripeClient.billingPortal.sessions.create({
     customer: customerId,
     return_url: returnUrl,
   });
@@ -92,7 +104,8 @@ export async function createCustomerPortal({
  * Cancelar assinatura
  */
 export async function cancelSubscription(subscriptionId: string) {
-  const subscription = await stripe.subscriptions.cancel(subscriptionId);
+  const stripeClient = ensureStripe();
+  const subscription = await stripeClient.subscriptions.cancel(subscriptionId);
   return subscription;
 }
 
@@ -106,9 +119,10 @@ export async function updateSubscription({
   subscriptionId: string;
   priceId: string;
 }) {
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const stripeClient = ensureStripe();
+  const subscription = await stripeClient.subscriptions.retrieve(subscriptionId);
   
-  const updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
+  const updatedSubscription = await stripeClient.subscriptions.update(subscriptionId, {
     items: [
       {
         id: subscription.items.data[0].id,
@@ -125,7 +139,8 @@ export async function updateSubscription({
  * Verificar status da assinatura
  */
 export async function getSubscription(subscriptionId: string) {
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const stripeClient = ensureStripe();
+  const subscription = await stripeClient.subscriptions.retrieve(subscriptionId);
   return subscription;
 }
 
@@ -133,7 +148,8 @@ export async function getSubscription(subscriptionId: string) {
  * Listar assinaturas de um cliente
  */
 export async function listCustomerSubscriptions(customerId: string) {
-  const subscriptions = await stripe.subscriptions.list({
+  const stripeClient = ensureStripe();
+  const subscriptions = await stripeClient.subscriptions.list({
     customer: customerId,
     status: 'all',
   });
