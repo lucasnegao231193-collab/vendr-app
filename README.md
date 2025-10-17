@@ -1,6 +1,9 @@
 # 🛒 Venlo - Sistema de Gestão de Vendas Externas
 
-Sistema completo para gestão de vendas ambulantes e externas, com suporte offline, dashboard em tempo real e PWA.
+Sistema completo para gestão de vendas ambulantes e externas. Funciona 100% offline com sincronização automática.
+
+**🌐 Site:** https://venlo.com.br  
+**📚 Documentação Completa:** [DOCS.md](./DOCS.md)
 
 ## 🚀 Tecnologias
 
