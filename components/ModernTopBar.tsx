@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { InstallPWAButton } from "@/components/InstallPWAButton";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -137,6 +138,9 @@ export function ModernTopBar({
               <Moon className="h-5 w-5" />
             )}
           </Button>
+
+          {/* Install PWA Button */}
+          <InstallPWAButton />
 
           {/* Notificações */}
           <div className="relative">
