@@ -1,10 +1,20 @@
 // Service Worker Customizado - Venlo PWA
-const CACHE_VERSION = 'venlo-v1';
+const CACHE_VERSION = 'venlo-v2';
 const CACHE_NAMES = {
   static: `${CACHE_VERSION}-static`,
   dynamic: `${CACHE_VERSION}-dynamic`,
   images: `${CACHE_VERSION}-images`,
   api: `${CACHE_VERSION}-api`,
+  pages: `${CACHE_VERSION}-pages`,
+};
+
+// Não limitar - cachear tudo
+const CACHE_LIMITS = {
+  static: 200,
+  dynamic: 200,
+  images: 500,
+  api: 100,
+  pages: 100,
 };
 
 const STATIC_ASSETS = [
@@ -12,6 +22,7 @@ const STATIC_ASSETS = [
   '/offline.html',
   '/icon-192.png',
   '/icon-512.png',
+  '/apple-touch-icon.png',
   '/manifest.json',
 ];
 
@@ -45,7 +56,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch - Network first, fallback to cache
+// Fetch - Cache AGRESSIVO para funcionar 100% offline
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -53,26 +64,35 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip chrome extensions
-  if (url.protocol === 'chrome-extension:') return;
+  // Skip chrome extensions e outros protocolos
+  if (!url.protocol.startsWith('http')) return;
+
+  // Skip URLs externas (exceto Supabase)
+  if (url.origin !== self.location.origin && !url.origin.includes('supabase.co')) {
+    return;
+  }
 
   // Handle different types of requests
-  if (request.url.includes('/api/')) {
-    // API requests - Network first
-    event.respondWith(networkFirstStrategy(request, CACHE_NAMES.api));
-  } else if (request.destination === 'image') {
-    // Images - Cache first
+  if (request.url.includes('/api/') || request.url.includes('supabase.co')) {
+    // API requests - Cache first com network fallback (para funcionar offline)
+    event.respondWith(cacheFirstWithNetworkUpdate(request, CACHE_NAMES.api));
+  } else if (request.destination === 'image' || /\.(png|jpg|jpeg|svg|gif|webp|ico)$/i.test(url.pathname)) {
+    // Images - Cache first sempre
     event.respondWith(cacheFirstStrategy(request, CACHE_NAMES.images));
   } else if (
     request.destination === 'script' ||
     request.destination === 'style' ||
-    request.url.includes('/_next/static/')
+    request.url.includes('/_next/static/') ||
+    /\.(js|css|woff|woff2|ttf|eot)$/i.test(url.pathname)
   ) {
-    // Static assets - Cache first
+    // Static assets - Cache first sempre
     event.respondWith(cacheFirstStrategy(request, CACHE_NAMES.static));
+  } else if (request.mode === 'navigate' || request.destination === 'document') {
+    // Pages/HTML - Cache first com network update
+    event.respondWith(cacheFirstWithNetworkUpdate(request, CACHE_NAMES.pages));
   } else {
-    // Pages - Network first
-    event.respondWith(networkFirstStrategy(request, CACHE_NAMES.dynamic));
+    // Tudo mais - Cache first
+    event.respondWith(cacheFirstWithNetworkUpdate(request, CACHE_NAMES.dynamic));
   }
 });
 
@@ -98,7 +118,7 @@ async function networkFirstStrategy(request, cacheName) {
   }
 }
 
-// Cache First Strategy
+// Cache First Strategy - Sempre retorna do cache se existir
 async function cacheFirstStrategy(request, cacheName) {
   const cachedResponse = await caches.match(request);
   if (cachedResponse) {
@@ -113,9 +133,51 @@ async function cacheFirstStrategy(request, cacheName) {
     }
     return response;
   } catch (error) {
-    // For images, return a placeholder or throw
+    // Se falhar e não tiver cache, retorna erro
     throw error;
   }
+}
+
+// Cache First com Network Update em background
+async function cacheFirstWithNetworkUpdate(request, cacheName) {
+  const cachedResponse = await caches.match(request);
+  
+  // Sempre tenta atualizar em background (se online)
+  const fetchPromise = fetch(request)
+    .then(response => {
+      if (response.ok) {
+        const cache = caches.open(cacheName);
+        cache.then(c => c.put(request, response.clone()));
+      }
+      return response;
+    })
+    .catch(() => null); // Ignora erros de rede
+
+  // Se tem cache, retorna imediatamente
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  // Se não tem cache, aguarda a rede
+  try {
+    const response = await fetchPromise;
+    if (response && response.ok) {
+      return response;
+    }
+  } catch (error) {
+    // Ignora erro
+  }
+
+  // Fallback para offline page se for navegação
+  if (request.mode === 'navigate') {
+    const offlinePage = await caches.match('/offline.html');
+    if (offlinePage) {
+      return offlinePage;
+    }
+  }
+
+  // Retorna erro se não conseguiu nada
+  return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
 }
 
 // Listen for messages from clients
