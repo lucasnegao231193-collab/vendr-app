@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Providers } from "./providers";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { InstallPWA } from "@/components/InstallPWA";
+import { PWARegister } from "@/components/PWARegister";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -62,6 +63,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider defaultTheme="system" storageKey="venlo-theme">
           <Providers>
+            <PWARegister />
             {children}
             <Toaster />
             <InstallPWA />

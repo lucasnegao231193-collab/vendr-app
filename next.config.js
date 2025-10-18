@@ -1,8 +1,8 @@
 const withPWA = require('next-pwa')({
   dest: 'public',
-  register: true,
+  register: false, // Desabilitar registro automático - usamos PWARegister customizado
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: true, // Desabilitar next-pwa completamente
   buildExcludes: [/middleware-manifest\.json$/],
   fallbacks: {
     document: '/offline.html',
