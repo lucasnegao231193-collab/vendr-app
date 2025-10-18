@@ -2,54 +2,78 @@ const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: false, // Habilitar PWA em todos os ambientes
+  disable: process.env.NODE_ENV === 'development',
+  buildExcludes: [/middleware-manifest\.json$/],
   fallbacks: {
     document: '/offline.html',
   },
+  cacheOnFrontEndNav: true,
+  reloadOnOnline: true,
+  swcMinify: true,
   runtimeCaching: [
     {
-      urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+      urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
       handler: 'NetworkFirst',
       options: {
-        cacheName: 'supabase-cache',
+        cacheName: 'supabase-api',
         expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60 // 5 minutos
         },
-        networkTimeoutSeconds: 10
+        networkTimeoutSeconds: 10,
+        cacheableResponse: {
+          statuses: [0, 200]
+        }
       }
     },
     {
-      urlPattern: /^https?.*/,
-      handler: 'NetworkFirst',
+      urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
+      handler: 'NetworkOnly',
       options: {
-        cacheName: 'pages-cache',
+        cacheName: 'supabase-auth'
+      }
+    },
+    {
+      urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'supabase-storage',
         expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        },
-        networkTimeoutSeconds: 5
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 dias
+        }
       }
     },
     {
       urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
       handler: 'CacheFirst',
       options: {
-        cacheName: 'image-cache',
+        cacheName: 'images',
         expiration: {
-          maxEntries: 64,
-          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 dias
         }
       }
     },
     {
-      urlPattern: /\.(?:js|css)$/i,
+      urlPattern: /\.(?:js)$/i,
       handler: 'StaleWhileRevalidate',
       options: {
-        cacheName: 'static-resources',
+        cacheName: 'js',
         expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60 // 1 dia
+        }
+      }
+    },
+    {
+      urlPattern: /\.(?:css)$/i,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'css',
+        expiration: {
+          maxEntries: 30,
+          maxAgeSeconds: 24 * 60 * 60 // 1 dia
         }
       }
     },
@@ -59,9 +83,42 @@ const withPWA = require('next-pwa')({
       options: {
         cacheName: 'next-data',
         expiration: {
-          maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60
-        }
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60 // 1 dia
+        },
+        networkTimeoutSeconds: 5
+      }
+    },
+    {
+      urlPattern: /\/api\/.*/i,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'apis',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60 // 5 minutos
+        },
+        networkTimeoutSeconds: 10
+      }
+    },
+    {
+      urlPattern: ({url}) => {
+        const isSameOrigin = self.origin === url.origin;
+        if (!isSameOrigin) return false;
+        const pathname = url.pathname;
+        // Excluir API routes
+        if (pathname.startsWith('/api/')) return false;
+        // Incluir páginas
+        return pathname.startsWith('/');
+      },
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'pages',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 24 * 60 * 60 // 1 dia
+        },
+        networkTimeoutSeconds: 5
       }
     }
   ]
