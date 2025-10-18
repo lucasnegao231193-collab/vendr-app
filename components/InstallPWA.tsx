@@ -13,6 +13,7 @@ interface BeforeInstallPromptEvent extends Event {
 export function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     // Verificar se já está instalado
@@ -22,25 +23,41 @@ export function InstallPWA() {
 
     // Verificar se o usuário já dispensou o banner
     const dismissed = localStorage.getItem('pwa-install-dismissed');
-    if (dismissed) {
+    const dismissedTime = localStorage.getItem('pwa-install-dismissed-time');
+    
+    // Resetar após 7 dias
+    if (dismissed && dismissedTime) {
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      if (Date.now() - parseInt(dismissedTime) > sevenDays) {
+        localStorage.removeItem('pwa-install-dismissed');
+        localStorage.removeItem('pwa-install-dismissed-time');
+      } else {
+        return;
+      }
+    } else if (dismissed) {
       return;
     }
 
-    // Capturar o evento beforeinstallprompt
+    // Detectar iOS
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOS(isIOSDevice);
+
+    // Capturar o evento beforeinstallprompt (Android/Desktop)
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      
-      // Mostrar banner após 10 segundos
-      setTimeout(() => {
-        setShowInstallBanner(true);
-      }, 10000);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
+    // Mostrar banner após 5 segundos (para todos os dispositivos)
+    const timer = setTimeout(() => {
+      setShowInstallBanner(true);
+    }, 5000);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -65,9 +82,17 @@ export function InstallPWA() {
   const handleDismiss = () => {
     setShowInstallBanner(false);
     localStorage.setItem('pwa-install-dismissed', 'true');
+    localStorage.setItem('pwa-install-dismissed-time', Date.now().toString());
   };
 
-  if (!showInstallBanner || !deferredPrompt) {
+  // Não mostrar se não estiver visível
+  if (!showInstallBanner) {
+    return null;
+  }
+
+  // Para iOS, mostrar instruções mesmo sem deferredPrompt
+  // Para Android/Desktop, só mostrar se tiver deferredPrompt
+  if (!isIOS && !deferredPrompt) {
     return null;
   }
 
@@ -84,27 +109,46 @@ export function InstallPWA() {
               <h3 className="font-bold text-[#0D1B2A] mb-1">
                 Instalar Venlo
               </h3>
-              <p className="text-sm text-gray-600 mb-3">
-                Instale o app na sua tela inicial para acesso rápido e funcionalidade offline.
-              </p>
               
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleInstall}
-                  className="bg-[#FF6600] hover:bg-[#cc5200] text-white"
-                  size="sm"
-                >
-                  Instalar
-                </Button>
-                <Button
-                  onClick={handleDismiss}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-600"
-                >
-                  Agora não
-                </Button>
-              </div>
+              {isIOS ? (
+                <>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Toque em <span className="font-semibold">Compartilhar □↑</span> e depois em <span className="font-semibold">"Adicionar à Tela de Início"</span>
+                  </p>
+                  <Button
+                    onClick={handleDismiss}
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-600"
+                  >
+                    Entendi
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Instale o app na sua tela inicial para acesso rápido e funcionalidade offline.
+                  </p>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleInstall}
+                      className="bg-[#FF6600] hover:bg-[#cc5200] text-white"
+                      size="sm"
+                    >
+                      Instalar
+                    </Button>
+                    <Button
+                      onClick={handleDismiss}
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-600"
+                    >
+                      Agora não
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
 
             <button
