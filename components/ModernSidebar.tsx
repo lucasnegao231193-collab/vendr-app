@@ -24,6 +24,7 @@ import {
   ArrowLeftRight,
   TrendingUp,
   RotateCcw,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,12 @@ const navItems: NavItem[] = [
     label: "Relatórios",
     href: "/relatorios",
     icon: BarChart3,
+    role: ["owner", "admin"],
+  },
+  {
+    label: "Catálogo",
+    href: "/catalogo",
+    icon: MapPin,
     role: ["owner", "admin"],
   },
   {

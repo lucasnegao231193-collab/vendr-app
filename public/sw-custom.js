@@ -1,5 +1,5 @@
 // Service Worker Customizado - Venlo PWA
-const CACHE_VERSION = 'venlo-v2';
+const CACHE_VERSION = 'venlo-v3';
 const CACHE_NAMES = {
   static: `${CACHE_VERSION}-static`,
   dynamic: `${CACHE_VERSION}-dynamic`,
@@ -138,45 +138,53 @@ async function cacheFirstStrategy(request, cacheName) {
   }
 }
 
-// Cache First com Network Update em background
+// Network First com Cache Fallback - Melhor para páginas dinâmicas
 async function cacheFirstWithNetworkUpdate(request, cacheName) {
+  // Para navegação de páginas, sempre tenta a rede primeiro
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    try {
+      const response = await fetch(request, { cache: 'no-cache' });
+      if (response.ok) {
+        const cache = await caches.open(cacheName);
+        cache.put(request, response.clone());
+        return response;
+      }
+    } catch (error) {
+      // Se falhar, tenta o cache
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      // Fallback para offline page
+      return caches.match('/offline.html');
+    }
+  }
+
+  // Para outros recursos (API, etc), usa cache first
   const cachedResponse = await caches.match(request);
   
-  // Sempre tenta atualizar em background (se online)
+  // Atualiza em background
   const fetchPromise = fetch(request)
     .then(response => {
       if (response.ok) {
-        const cache = caches.open(cacheName);
-        cache.then(c => c.put(request, response.clone()));
+        caches.open(cacheName).then(c => c.put(request, response.clone()));
       }
       return response;
     })
-    .catch(() => null); // Ignora erros de rede
+    .catch(() => null);
 
-  // Se tem cache, retorna imediatamente
+  // Se tem cache, retorna
   if (cachedResponse) {
     return cachedResponse;
   }
 
   // Se não tem cache, aguarda a rede
-  try {
-    const response = await fetchPromise;
-    if (response && response.ok) {
-      return response;
-    }
-  } catch (error) {
-    // Ignora erro
+  const response = await fetchPromise;
+  if (response && response.ok) {
+    return response;
   }
 
-  // Fallback para offline page se for navegação
-  if (request.mode === 'navigate') {
-    const offlinePage = await caches.match('/offline.html');
-    if (offlinePage) {
-      return offlinePage;
-    }
-  }
-
-  // Retorna erro se não conseguiu nada
+  // Fallback
   return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
 }
 

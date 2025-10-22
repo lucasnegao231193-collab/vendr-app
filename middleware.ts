@@ -62,8 +62,27 @@ export async function middleware(request: NextRequest) {
   // Verificar acesso às áreas protegidas
   const path = request.nextUrl.pathname;
   
+  console.log('🛡️ Middleware:', { path, userId: user?.id });
+  
   if (user) {
-    // Buscar tipo de empresa do usuário
+    // PRIMEIRO: Verificar se é admin (admins não têm perfil/empresa)
+    const { data: adminData, error: adminError } = await supabase
+      .from('admins')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    
+    console.log('👮 Middleware - Verificação de admin:', { adminData, adminError });
+    
+    // Se é admin, permitir acesso sem verificar perfil
+    if (adminData) {
+      console.log('✅ Middleware - É admin, permitindo acesso');
+      return response;
+    }
+    
+    console.log('ℹ️ Middleware - Não é admin, verificando perfil...');
+    
+    // Buscar tipo de empresa do usuário (apenas para não-admins)
     const { data: perfil } = await supabase
       .from('perfis')
       .select('empresa_id')
@@ -94,6 +113,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

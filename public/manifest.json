@@ -1,7 +1,7 @@
 {
   "name": "Venlo - Gestão de Vendas Externas",
   "short_name": "Venlo",
-  "description": "Sistema completo para gestão de vendas externas e ambulantes. Funciona 100% offline com sincronização automática.",
+  "description": "Sistema completo para gestão de vendas externas e ambulantes.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",

@@ -68,67 +68,56 @@ export default function SoloOnboardingPage() {
       }
 
       // 2. Criar usuário no Supabase Auth
+      // O trigger do banco vai criar automaticamente: empresa Solo, perfil e cota
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password: senha,
         options: {
           emailRedirectTo: `${window.location.origin}/solo`,
+          data: {
+            full_name: nomeNegocio || email.split('@')[0],
+            account_type: 'solo', // Indica que é conta Solo
+          }
         },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Erro ao criar usuário");
 
-      // 2.5 Fazer login imediatamente (caso email confirmation esteja desabilitado)
+      // Verificar se precisa confirmar email
+      if (authData.user.identities && authData.user.identities.length === 0) {
+        toast({
+          title: "✉️ Confirme seu email",
+          description: "Enviamos um link de confirmação. Após confirmar, faça login.",
+        });
+        router.push('/login');
+        return;
+      }
+
+      // Se não precisa confirmar, fazer login
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password: senha,
       });
 
-      if (signInError) console.warn('Login após signup falhou:', signInError);
-
-      // 3. Criar empresa Solo
-      const { data: empresa, error: empresaError } = await supabase
-        .from("empresas")
-        .insert({
-          owner_id: authData.user.id,
-          nome: nomeNegocio || `Negócio de ${email.split('@')[0]}`,
-          is_solo: true,
-          plano: 'solo_free',
-        })
-        .select()
-        .single();
-
-      if (empresaError) throw empresaError;
-
-      // 4. Criar perfil do usuário
-      const { error: perfilError } = await supabase
-        .from("perfis")
-        .insert({
-          user_id: authData.user.id,
-          empresa_id: empresa.id,
-          nome: email.split('@')[0],
-          role: 'owner',
+      if (signInError) {
+        toast({
+          title: "✉️ Confirme seu email",
+          description: "Enviamos um link de confirmação. Após confirmar, faça login.",
         });
+        router.push('/login');
+        return;
+      }
 
-      if (perfilError) throw perfilError;
-
-      // 5. Criar cota inicial (opcional - será criada automaticamente na primeira venda)
-      const anoMes = new Date().toISOString().slice(0, 7);
-      await supabase
-        .from("solo_cotas")
-        .insert({
-          empresa_id: empresa.id,
-          ano_mes: anoMes,
-          vendas_mes: 0,
-        });
+      // Aguardar trigger criar empresa e perfil
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       toast({
-        title: "✓ Bem-vindo ao Vendr Solo!",
+        title: "✓ Bem-vindo ao Venlo Solo!",
         description: "Sua conta foi criada com sucesso",
       });
 
-      // 6. Redirecionar para dashboard Solo
+      // Redirecionar para dashboard Solo
       router.push("/solo");
 
     } catch (error: any) {

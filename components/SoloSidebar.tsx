@@ -20,6 +20,7 @@ import {
   ChevronRight,
   Wrench,
   Wallet,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,11 @@ const soloNavItems: NavItem[] = [
     label: "Assinatura",
     href: "/solo/assinatura",
     icon: Crown,
+  },
+  {
+    label: "Catálogo",
+    href: "/catalogo",
+    icon: MapPin,
   },
   {
     label: "Configurações",

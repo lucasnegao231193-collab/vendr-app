@@ -17,9 +17,12 @@ import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { motion } from "framer-motion";
 import { PlanoType } from "@/types/solo";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { DashboardPessoal } from "@/components/painel/DashboardPessoal";
+import { useVenloMode } from "@/hooks/useVenloMode";
 
 export default function SoloDashboardPage() {
   const router = useRouter();
+  const { mode, isLoading: modeLoading } = useVenloMode();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     vendasHoje: 0,
@@ -30,6 +33,14 @@ export default function SoloDashboardPage() {
     limiteVendas: 30,
     plano: 'solo_free' as PlanoType,
   });
+
+  // Log para debug
+  useEffect(() => {
+    console.log('🔄 Modo atual na página:', mode);
+    console.log('🔄 Mode loading:', modeLoading);
+  }, [mode, modeLoading]);
+  
+  console.log('🎯 RENDER - Modo:', mode, 'Loading:', modeLoading);
 
   useEffect(() => {
     loadStats();
@@ -49,7 +60,7 @@ export default function SoloDashboardPage() {
     }
   };
 
-  if (loading) {
+  if (loading || modeLoading) {
     return (
       <div className="p-6">
         <DashboardSkeleton />
@@ -89,7 +100,7 @@ export default function SoloDashboardPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6" key={mode}>
       <OnboardingTour role="solo" />
       <Breadcrumbs />
 
@@ -99,19 +110,24 @@ export default function SoloDashboardPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-3xl font-bold text-[#121212]">
-            Dashboard Solo
+            {mode === 'PROFISSIONAL' ? 'Dashboard Solo' : 'Finanças Pessoais'}
           </h1>
           <p className="text-gray-600">
-            Bem-vindo ao seu painel autônomo
+            {mode === 'PROFISSIONAL' 
+              ? 'Bem-vindo ao seu painel autônomo' 
+              : 'Controle suas finanças pessoais'}
           </p>
         </motion.div>
 
-        {/* Badge de Plano */}
-        <SoloPlanBadge
-          plano={stats.plano}
-          vendasMes={stats.vendasMes}
-          limite={stats.limiteVendas}
-        />
+        {/* Renderizar baseado no modo */}
+        {mode === 'PROFISSIONAL' ? (
+          <>
+            {/* Badge de Plano */}
+            <SoloPlanBadge
+              plano={stats.plano}
+              vendasMes={stats.vendasMes}
+              limite={stats.limiteVendas}
+            />
 
         {/* Ações Rápidas */}
         <motion.div
@@ -246,6 +262,10 @@ export default function SoloDashboardPage() {
               </CardContent>
             </Card>
           </motion.div>
+        )}
+          </>
+        ) : (
+          <DashboardPessoal />
         )}
     </div>
   );

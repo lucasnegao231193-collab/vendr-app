@@ -63,14 +63,42 @@ export default function LoginPage() {
 
       if (error) throw error;
 
+      console.log("🔍 Login bem-sucedido, verificando tipo de usuário...");
+      console.log("🆔 User ID:", data.user.id);
+
+      // PRIMEIRO: Verificar se é admin
+      const { data: adminData, error: adminError } = await supabase
+        .from("admins")
+        .select("*")
+        .eq("user_id", data.user.id)
+        .single();
+
+      console.log("👤 Verificação de admin:", { adminData, adminError });
+
+      if (adminData) {
+        console.log("✅ Usuário identificado como ADMIN, redirecionando para /admin");
+        toast({
+          title: "Bem-vindo Admin!",
+          description: "Acesso ao painel administrativo",
+        });
+        router.push("/admin");
+        router.refresh();
+        return;
+      }
+
+      console.log("ℹ️ Não é admin, verificando perfil normal...");
+
       // Buscar perfil para verificar role e empresa
-      const { data: perfil } = await supabase
+      const { data: perfil, error: perfilError } = await supabase
         .from("perfis")
         .select("role, empresa_id")
         .eq("user_id", data.user.id)
         .single();
 
+      console.log("📋 Verificação de perfil:", { perfil, perfilError });
+
       if (!perfil) {
+        console.log("🆕 Novo usuário, redirecionando para onboarding");
         // Novo usuário -> onboarding baseado na aba
         if (activeTab === "autonomo") {
           router.push("/onboarding/solo");
@@ -87,15 +115,19 @@ export default function LoginPage() {
         .eq("id", perfil.empresa_id)
         .single();
 
+      console.log("🏢 Tipo de empresa:", { is_solo: empresa?.is_solo });
+
       // Redirecionar baseado no role e tipo de empresa
       if (perfil.role === "owner") {
         if (empresa?.is_solo) {
+          console.log("🎯 Redirecionando para /solo");
           toast({
             title: "Bem-vindo ao Venlo Solo!",
             description: "Acesso ao seu painel autônomo",
           });
           router.push("/solo");
         } else {
+          console.log("🎯 Redirecionando para /dashboard");
           toast({
             title: "Bem-vindo!",
             description: "Acesso ao dashboard da empresa",
@@ -103,6 +135,7 @@ export default function LoginPage() {
           router.push("/dashboard");
         }
       } else if (perfil.role === "seller") {
+        console.log("🎯 Redirecionando para /vendedor");
         toast({
           title: "Olá vendedor!",
           description: "Acesso ao seu painel",

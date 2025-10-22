@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Offline - Venlo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0D1B2A 0%, #415A77 100%);
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    .status-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .status-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-label {
+      font-weight: 600;
+    }
+
+    .status-value {
+      font-family: monospace;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    .status-ok {
+      color: #10B981;
+    }
+
+    .status-error {
+      color: #EF4444;
+    }
+
+    .status-warning {
+      color: #F59E0B;
+    }
+
+    .button {
+      background: #FF6600;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 5px;
+      transition: all 0.3s;
+    }
+
+    .button:hover {
+      background: #CC5200;
+      transform: translateY(-2px);
+    }
+
+    .button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .log-area {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 20px;
+    }
+
+    .log-entry {
+      margin-bottom: 5px;
+    }
+
+    .log-success { color: #10B981; }
+    .log-error { color: #EF4444; }
+    .log-info { color: #3B82F6; }
+    .log-warning { color: #F59E0B; }
+
+    .actions {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Diagnóstico de Funcionalidade Offline</h1>
+
+    <div class="status-card">
+      <h2 style="margin-bottom: 15px;">📊 Status do Sistema</h2>
+      <div class="status-item">
+        <span class="status-label">Conexão:</span>
+        <span class="status-value" id="connection-status">Verificando...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Service Worker Suportado:</span>
+        <span class="status-value" id="sw-support">Verificando...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Service Worker Registrado:</span>
+        <span class="status-value" id="sw-registered">Verificando...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Service Worker Ativo:</span>
+        <span class="status-value" id="sw-active">Verificando...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Cache API Suportada:</span>
+        <span class="status-value" id="cache-support">Verificando...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Caches Disponíveis:</span>
+        <span class="status-value" id="cache-count">Verificando...</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="button" onclick="testOffline()">🧪 Testar Modo Offline</button>
+      <button class="button" onclick="clearAllCaches()">🗑️ Limpar Todos os Caches</button>
+      <button class="button" onclick="unregisterAllSW()">❌ Desregistrar Service Workers</button>
+      <button class="button" onclick="reloadPage()">🔄 Recarregar Página</button>
+    </div>
+
+    <div class="log-area" id="log-area">
+      <div class="log-entry log-info">Iniciando diagnóstico...</div>
+    </div>
+  </div>
+
+  <script>
+    // Logging
+    function log(message, type = 'info') {
+      const logArea = document.getElementById('log-area');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logArea.appendChild(entry);
+      logArea.scrollTop = logArea.scrollHeight;
+      console.log(message);
+    }
+
+    // Update status
+    function updateStatus(id, value, isOk = true) {
+      const element = document.getElementById(id);
+      element.textContent = value;
+      element.className = 'status-value ' + (isOk ? 'status-ok' : 'status-error');
+    }
+
+    // Check connection
+    function checkConnection() {
+      const online = navigator.onLine;
+      updateStatus('connection-status', online ? '🟢 Online' : '🔴 Offline', online);
+      log(`Conexão: ${online ? 'Online' : 'Offline'}`, online ? 'success' : 'warning');
+      return online;
+    }
+
+    // Check Service Worker support
+    function checkSWSupport() {
+      const supported = 'serviceWorker' in navigator;
+      updateStatus('sw-support', supported ? '✅ Sim' : '❌ Não', supported);
+      log(`Service Worker suportado: ${supported}`, supported ? 'success' : 'error');
+      return supported;
+    }
+
+    // Check Service Worker registration
+    async function checkSWRegistration() {
+      if (!('serviceWorker' in navigator)) {
+        updateStatus('sw-registered', '❌ Não suportado', false);
+        updateStatus('sw-active', '❌ Não suportado', false);
+        return;
+      }
+
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        log(`Total de Service Workers registrados: ${registrations.length}`, 'info');
+        
+        if (registrations.length === 0) {
+          updateStatus('sw-registered', '❌ Nenhum', false);
+          updateStatus('sw-active', '❌ Nenhum', false);
+          log('Nenhum Service Worker registrado!', 'error');
+          return;
+        }
+
+        updateStatus('sw-registered', `✅ ${registrations.length}`, true);
+        
+        registrations.forEach((reg, index) => {
+          log(`SW ${index + 1}: ${reg.scope}`, 'info');
+          if (reg.active) {
+            log(`  - Ativo: ${reg.active.scriptURL}`, 'success');
+          }
+          if (reg.installing) {
+            log(`  - Instalando: ${reg.installing.scriptURL}`, 'warning');
+          }
+          if (reg.waiting) {
+            log(`  - Aguardando: ${reg.waiting.scriptURL}`, 'warning');
+          }
+        });
+
+        const activeReg = registrations.find(reg => reg.active);
+        if (activeReg) {
+          updateStatus('sw-active', '✅ Sim', true);
+          log(`Service Worker ativo encontrado!`, 'success');
+        } else {
+          updateStatus('sw-active', '⚠️ Instalando', false);
+          log('Service Worker registrado mas não ativo ainda', 'warning');
+        }
+      } catch (error) {
+        log(`Erro ao verificar SW: ${error.message}`, 'error');
+        updateStatus('sw-registered', '❌ Erro', false);
+        updateStatus('sw-active', '❌ Erro', false);
+      }
+    }
+
+    // Check Cache API
+    async function checkCacheAPI() {
+      const supported = 'caches' in window;
+      updateStatus('cache-support', supported ? '✅ Sim' : '❌ Não', supported);
+      
+      if (!supported) {
+        log('Cache API não suportada', 'error');
+        updateStatus('cache-count', '❌ N/A', false);
+        return;
+      }
+
+      try {
+        const cacheNames = await caches.keys();
+        updateStatus('cache-count', `${cacheNames.length} cache(s)`, cacheNames.length > 0);
+        log(`Total de caches: ${cacheNames.length}`, cacheNames.length > 0 ? 'success' : 'warning');
+        
+        if (cacheNames.length > 0) {
+          log('Caches encontrados:', 'info');
+          for (const name of cacheNames) {
+            const cache = await caches.open(name);
+            const keys = await cache.keys();
+            log(`  - ${name}: ${keys.length} itens`, 'info');
+          }
+        } else {
+          log('Nenhum cache encontrado. Navegue pelo site para popular o cache.', 'warning');
+        }
+      } catch (error) {
+        log(`Erro ao verificar caches: ${error.message}`, 'error');
+        updateStatus('cache-count', '❌ Erro', false);
+      }
+    }
+
+    // Test offline functionality
+    async function testOffline() {
+      log('=== INICIANDO TESTE OFFLINE ===', 'info');
+      
+      if (!navigator.onLine) {
+        log('✅ Você já está offline!', 'success');
+        log('Tente navegar para outras páginas que você já visitou', 'info');
+        return;
+      }
+
+      log('Você está online. Para testar offline:', 'warning');
+      log('1. Ative o modo avião no seu dispositivo', 'info');
+      log('2. Ou no DevTools: Network > Offline', 'info');
+      log('3. Depois recarregue a página', 'info');
+      log('4. Tente navegar para páginas já visitadas', 'info');
+    }
+
+    // Clear all caches
+    async function clearAllCaches() {
+      if (!('caches' in window)) {
+        log('Cache API não disponível', 'error');
+        return;
+      }
+
+      try {
+        const cacheNames = await caches.keys();
+        log(`Limpando ${cacheNames.length} cache(s)...`, 'info');
+        
+        for (const name of cacheNames) {
+          await caches.delete(name);
+          log(`✅ Cache removido: ${name}`, 'success');
+        }
+        
+        log('Todos os caches foram limpos!', 'success');
+        setTimeout(() => location.reload(), 1000);
+      } catch (error) {
+        log(`Erro ao limpar caches: ${error.message}`, 'error');
+      }
+    }
+
+    // Unregister all service workers
+    async function unregisterAllSW() {
+      if (!('serviceWorker' in navigator)) {
+        log('Service Worker não suportado', 'error');
+        return;
+      }
+
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        log(`Desregistrando ${registrations.length} Service Worker(s)...`, 'info');
+        
+        for (const registration of registrations) {
+          await registration.unregister();
+          log(`✅ Service Worker desregistrado: ${registration.scope}`, 'success');
+        }
+        
+        log('Todos os Service Workers foram desregistrados!', 'success');
+        log('Recarregando em 2 segundos...', 'info');
+        setTimeout(() => location.reload(), 2000);
+      } catch (error) {
+        log(`Erro ao desregistrar SW: ${error.message}`, 'error');
+      }
+    }
+
+    // Reload page
+    function reloadPage() {
+      log('Recarregando página...', 'info');
+      location.reload();
+    }
+
+    // Run diagnostics on load
+    async function runDiagnostics() {
+      log('Executando diagnóstico completo...', 'info');
+      checkConnection();
+      checkSWSupport();
+      await checkSWRegistration();
+      await checkCacheAPI();
+      log('=== DIAGNÓSTICO CONCLUÍDO ===', 'success');
+      log('', 'info');
+      log('📋 PRÓXIMOS PASSOS:', 'info');
+      log('1. Se não há SW registrado, navegue pelo site primeiro', 'info');
+      log('2. Depois volte aqui e recarregue', 'info');
+      log('3. Use os botões acima para testar', 'info');
+    }
+
+    // Listen for online/offline events
+    window.addEventListener('online', () => {
+      log('🌐 Conexão restaurada!', 'success');
+      checkConnection();
+    });
+
+    window.addEventListener('offline', () => {
+      log('📴 Conexão perdida!', 'warning');
+      checkConnection();
+    });
+
+    // Run on load
+    runDiagnostics();
+  </script>
+</body>
+</html>

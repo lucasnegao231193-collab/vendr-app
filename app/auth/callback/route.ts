@@ -49,6 +49,25 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(`${requestUrl.origin}/login?error=no_user`);
       }
 
+      console.log('🔍 OAuth Callback - User ID:', sessionData.user.id);
+
+      // Verificar se é admin PRIMEIRO
+      const { data: adminData, error: adminError } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('user_id', sessionData.user.id)
+        .single();
+
+      console.log('👤 Verificação de admin no callback:', { adminData, adminError });
+
+      if (adminData) {
+        console.log('✅ Admin identificado, redirecionando para /admin');
+        // É admin -> redirecionar para /admin
+        return NextResponse.redirect(`${requestUrl.origin}/admin`);
+      }
+
+      console.log('ℹ️ Não é admin, verificando perfil...');
+
       // Buscar perfil do usuário
       const { data: perfil, error: perfilError } = await supabase
         .from('perfis')

@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   Plus,
   ArrowLeftRight,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserRole } from "@/lib/navigation";
@@ -27,9 +28,8 @@ export function BottomNav({ role }: BottomNavProps) {
 
   const ownerItems = [
     { label: "Home", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Vendedores", href: "/vendedores", icon: Users },
     { label: "Estoque", href: "/estoque", icon: Package },
-    { label: "Transfer.", href: "/empresa/transferencias", icon: ArrowLeftRight },
+    { label: "Catálogo", href: "/catalogo", icon: MapPin },
     { label: "Mais", href: "/configuracoes", icon: MoreHorizontal },
   ];
 
@@ -43,9 +43,8 @@ export function BottomNav({ role }: BottomNavProps) {
 
   const soloItems = [
     { label: "Home", href: "/solo", icon: LayoutDashboard },
-    { label: "Serviços", href: "/solo/servicos", icon: Package },
     { label: "Estoque", href: "/solo/estoque", icon: Package },
-    { label: "Vendas", href: "/solo/vendas", icon: Wallet },
+    { label: "Catálogo", href: "/catalogo", icon: MapPin },
     { label: "Mais", href: "/solo/configuracoes", icon: MoreHorizontal },
   ];
 

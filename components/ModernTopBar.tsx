@@ -10,18 +10,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Bell,
+  LogOut,
+  Menu,
+  Settings,
+  User,
+  X,
   Moon,
   Sun,
-  LogOut,
-  User,
-  Settings,
   ChevronDown,
 } from "lucide-react";
+import { ModeSwitch } from "@/components/painel/ModeSwitch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { InstallPWAButton } from "@/components/InstallPWAButton";
+import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -41,9 +45,12 @@ export function ModernTopBar({
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  
+  const userEmail = user?.email;
 
   // Cmd+K / Ctrl+K para abrir busca
   useEffect(() => {
@@ -226,9 +233,15 @@ export function ModernTopBar({
                       {userName}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      owner@venlo.com
+                      {userEmail || 'owner@venlo.com'}
                     </p>
                   </div>
+                  
+                  {/* ModeSwitch */}
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-trust-blue-700">
+                    <ModeSwitch />
+                  </div>
+                  
                   <div className="py-2">
                     <button
                       onClick={() => router.push("/configuracoes")}
