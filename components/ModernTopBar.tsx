@@ -28,12 +28,14 @@ import { InstallPWAButton } from "@/components/InstallPWAButton";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { UserRole } from "@/lib/navigation";
 
 interface ModernTopBarProps {
   userName?: string;
   userAvatar?: string;
   notifications?: number;
   logoSrc?: string; // Caminho para logo personalizado (ex: /logo.png)
+  userRole?: UserRole;
 }
 
 export function ModernTopBar({
@@ -41,6 +43,7 @@ export function ModernTopBar({
   userAvatar,
   notifications = 0,
   logoSrc,
+  userRole,
 }: ModernTopBarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -237,10 +240,12 @@ export function ModernTopBar({
                     </p>
                   </div>
                   
-                  {/* ModeSwitch */}
-                  <div className="px-4 py-3 border-b border-gray-200 dark:border-trust-blue-700">
-                    <ModeSwitch />
-                  </div>
+                  {/* ModeSwitch - Apenas para Solo */}
+                  {userRole === 'solo' && (
+                    <div className="px-4 py-3 border-b border-gray-200 dark:border-trust-blue-700">
+                      <ModeSwitch />
+                    </div>
+                  )}
                   
                   <div className="py-2">
                     <button

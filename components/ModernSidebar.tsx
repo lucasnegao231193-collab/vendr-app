@@ -51,12 +51,6 @@ const navItems: NavItem[] = [
     role: ["owner", "admin"],
   },
   {
-    label: "Produtos",
-    href: "/produtos",
-    icon: Package,
-    role: ["owner", "admin"],
-  },
-  {
     label: "Vendas",
     href: "/vendas",
     icon: ShoppingCart,

@@ -1,9 +1,10 @@
 /**
  * VendedorStockList - Lista de estoque do vendedor
+ * Otimizado com React.memo para evitar re-renders desnecessários
  */
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ interface VendedorStockListProps {
   onRequestReturn?: (produtoId: string) => void;
 }
 
-export function VendedorStockList({ estoque, onRequestReturn }: VendedorStockListProps) {
+export const VendedorStockList = memo(function VendedorStockList({ estoque, onRequestReturn }: VendedorStockListProps) {
   const [search, setSearch] = useState("");
 
   const filtered = estoque.filter(item =>
@@ -102,4 +103,4 @@ export function VendedorStockList({ estoque, onRequestReturn }: VendedorStockLis
       </div>
     </div>
   );
-}
+});

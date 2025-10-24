@@ -31,6 +31,7 @@ export function AppShell({ children, role, userName }: AppShellProps) {
           userName={userName} 
           notifications={0} 
           logoSrc="/vendr-white-v3.png"
+          userRole={role}
         />
 
         {/* Área de Conteúdo com Scroll */}

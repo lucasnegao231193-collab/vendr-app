@@ -54,17 +54,7 @@ export default function AdminOnboardingPage() {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Erro ao criar usuário');
 
-      // Verificar se precisa confirmar email
-      if (authData.user.identities && authData.user.identities.length === 0) {
-        toast({
-          title: "✉️ Confirme seu email",
-          description: "Enviamos um link de confirmação. Após confirmar, você será admin.",
-        });
-        router.push('/login');
-        return;
-      }
-
-      // Fazer login
+      // Fazer login automaticamente
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password: senha,
@@ -72,8 +62,8 @@ export default function AdminOnboardingPage() {
 
       if (signInError) {
         toast({
-          title: "✉️ Confirme seu email",
-          description: "Enviamos um link de confirmação. Após confirmar, você será admin.",
+          title: "Conta criada!",
+          description: "Faça login para acessar como admin.",
         });
         router.push('/login');
         return;

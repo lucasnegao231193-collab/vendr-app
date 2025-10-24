@@ -59,8 +59,8 @@ export default function VendedoresPage() {
   const loadData = async () => {
     try {
       const [vendedoresRes, produtosRes] = await Promise.all([
-        supabase.from("vendedores").select("*").order("nome"),
-        supabase.from("produtos").select("*").eq("ativo", true),
+        supabase.from("vendedores").select("id, nome, email, telefone, doc, ativo, comissao_padrao, criado_em").order("nome"),
+        supabase.from("produtos").select("id, nome, preco, unidade").eq("ativo", true),
       ]);
 
       setVendedores(vendedoresRes.data || []);

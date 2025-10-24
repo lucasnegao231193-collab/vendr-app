@@ -90,7 +90,7 @@ export default function FinanceiroPage() {
       // Buscar despesas do mês
       const { data: despesasData } = await supabase
         .from("despesas")
-        .select("*")
+        .select("id, descricao, valor, data, categoria")
         .eq("empresa_id", empresaId)
         .gte("data", primeiroDiaMes)
         .order("data", { ascending: false });

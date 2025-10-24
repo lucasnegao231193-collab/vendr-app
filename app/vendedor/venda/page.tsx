@@ -59,7 +59,7 @@ export default function VendaPage() {
 
       const { data: vendedorData } = await supabase
         .from("vendedores")
-        .select("*")
+        .select("id, nome, empresa_id")
         .eq("user_id", user.id)
         .single();
 

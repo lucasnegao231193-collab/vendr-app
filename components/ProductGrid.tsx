@@ -1,8 +1,10 @@
 /**
  * Grid de produtos para seleção na venda
+ * Otimizado com React.memo para evitar re-renders desnecessários
  */
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +24,7 @@ interface ProductGridProps {
   onQuantidadeChange: (produtoId: string, delta: number) => void;
 }
 
-export function ProductGrid({ produtos, quantidades, onQuantidadeChange }: ProductGridProps) {
+export const ProductGrid = memo(function ProductGrid({ produtos, quantidades, onQuantidadeChange }: ProductGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {produtos.map((produto) => {
@@ -93,4 +95,4 @@ export function ProductGrid({ produtos, quantidades, onQuantidadeChange }: Produ
       })}
     </div>
   );
-}
+});

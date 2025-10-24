@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { Search, MapPin, Filter, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { EstabelecimentoComStats, CATEGORIAS } from '@/types/catalogo';
+import { AuthenticatedLayout } from '@/components/AuthenticatedLayout';
 
 export default function CatalogoPage() {
   const router = useRouter();
@@ -59,9 +61,10 @@ export default function CatalogoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-trust-blue-900 to-trust-blue-700 text-white py-16">
+    <AuthenticatedLayout>
+      <div>
+        {/* Hero Section */}
+        <div className="bg-gradient-to-r from-trust-blue-900 to-trust-blue-700 text-white py-12 -mx-6 -mt-6">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -164,10 +167,12 @@ export default function CatalogoPage() {
                   {/* Imagem */}
                   <div className="relative h-48 bg-gradient-to-br from-trust-blue-100 to-venlo-orange/20 overflow-hidden">
                     {est.imagens && est.imagens.length > 0 ? (
-                      <img
+                      <Image
                         src={est.imagens[0]}
                         alt={est.nome}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-gray-400">
@@ -238,5 +243,6 @@ export default function CatalogoPage() {
         )}
       </div>
     </div>
+    </AuthenticatedLayout>
   );
 }

@@ -47,12 +47,17 @@ export default function OperacoesPage() {
   const loadData = async () => {
     try {
       const [vendedoresRes, vendasRes] = await Promise.all([
-        supabase.from("vendedores").select("*").eq("ativo", true).order("nome"),
+        supabase.from("vendedores").select("id, nome").eq("ativo", true).order("nome"),
         supabase
           .from("vendas")
           .select(
             `
-            *,
+            id,
+            qtd,
+            valor_unit,
+            meio_pagamento,
+            data_hora,
+            status,
             vendedores (nome),
             produtos (nome)
           `

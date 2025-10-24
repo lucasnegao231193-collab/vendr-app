@@ -7,7 +7,9 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    unoptimized: true,
+    unoptimized: false, // Habilitar otimização de imagens
+    domains: ['localhost'], // Adicionar domínios permitidos se necessário
+    formats: ['image/webp', 'image/avif'], // Formatos modernos
   },
   async headers() {
     return [
@@ -29,6 +31,15 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/_next/image',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ]
   },
   reactStrictMode: true,
@@ -41,7 +52,13 @@ const nextConfig = {
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
+    // optimizeCss: true, // Removido - causava erro com critters
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'], // Otimizar imports
   },
+  // Compressão
+  compress: true,
+  // Otimizar fontes
+  optimizeFonts: true,
 };
 
 module.exports = withPWA(nextConfig);

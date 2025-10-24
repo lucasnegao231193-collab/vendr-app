@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { ArrowLeft, Upload, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -348,16 +349,18 @@ export default function CadastrarEstabelecimentoPage() {
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     {imagens.map((img, idx) => (
                       <div key={idx} className="relative aspect-square">
-                        <img
+                        <Image
                           src={img}
                           alt={`Imagem ${idx + 1}`}
-                          className="w-full h-full object-cover rounded-lg"
+                          fill
+                          className="object-cover rounded-lg"
+                          sizes="(max-width: 768px) 50vw, 20vw"
                         />
                         <Button
                           type="button"
                           variant="destructive"
                           size="icon"
-                          className="absolute top-1 right-1 h-6 w-6"
+                          className="absolute top-1 right-1 h-6 w-6 z-10"
                           onClick={() => removeImage(idx)}
                         >
                           <X className="h-4 w-4" />

@@ -80,7 +80,7 @@ export default function VendedorHomePage() {
       // Buscar primeiro vendedor da empresa (MVP)
       const { data: vendedorData } = await supabase
         .from("vendedores")
-        .select("*")
+        .select("id, nome, empresa_id")
         .eq("empresa_id", perfil.empresa_id)
         .limit(1)
         .single();
@@ -110,7 +110,7 @@ export default function VendedorHomePage() {
       // Buscar vendas do dia
       const { data: vendasData } = await supabase
         .from("vendas")
-        .select("*")
+        .select("id, qtd, valor_unit, meio_pagamento, data_hora")
         .eq("vendedor_id", vendedorData.id)
         .gte("data_hora", `${hoje}T00:00:00`)
         .lte("data_hora", `${hoje}T23:59:59`);

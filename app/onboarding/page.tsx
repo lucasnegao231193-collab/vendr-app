@@ -41,6 +41,7 @@ export default function OnboardingPage() {
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             nome_empresa: nomeEmpresa,
+            account_type: 'empresa', // Indica que é conta de empresa (não Solo)
           }
         },
       });

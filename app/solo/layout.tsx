@@ -13,7 +13,7 @@ export default function SoloLayout({
 }) {
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
-      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" />
+      <ModernTopBar userName="Autônomo" logoSrc="/vendr-white-v3.png" userRole="solo" />
       <SoloSidebar />
       <main className="md:ml-[280px] pt-16 pb-20 md:pb-6 transition-all duration-300">
         {children}

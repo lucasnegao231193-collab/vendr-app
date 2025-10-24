@@ -16,7 +16,6 @@ import { Loader2, User, Chrome } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { soloOnboardingSchema } from "@/lib/solo-schemas";
 import Link from "next/link";
-import { getOAuthCallbackUrl } from "@/lib/auth-helpers";
 
 export default function SoloOnboardingPage() {
   const [email, setEmail] = useState("");
@@ -35,7 +34,10 @@ export default function SoloOnboardingPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: getOAuthCallbackUrl('autonomo'),
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            account_type: 'solo',
+          },
         },
       });
 
@@ -55,62 +57,133 @@ export default function SoloOnboardingPage() {
     setLoading(true);
 
     try {
+      console.log('🚀 Iniciando cadastro Solo...');
+      
       // 1. Validar dados
-      const validation = soloOnboardingSchema.safeParse({
-        email,
-        senha,
-        nome_negocio: nomeNegocio || undefined,
-      });
-
-      if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        throw new Error(firstError.message);
+      if (!email || !senha) {
+        throw new Error('Email e senha são obrigatórios');
+      }
+      
+      if (senha.length < 6) {
+        throw new Error('Senha deve ter no mínimo 6 caracteres');
       }
 
-      // 2. Criar usuário no Supabase Auth
-      // O trigger do banco vai criar automaticamente: empresa Solo, perfil e cota
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      console.log('✅ Validação OK');
+
+      // 2. Tentar fazer login primeiro (verificar se já existe)
+      console.log('🔍 Verificando se usuário já existe...');
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email,
         password: senha,
-        options: {
-          emailRedirectTo: `${window.location.origin}/solo`,
-          data: {
-            full_name: nomeNegocio || email.split('@')[0],
-            account_type: 'solo', // Indica que é conta Solo
+      });
+
+      let userId: string;
+
+      if (loginData?.user) {
+        // Usuário já existe, usar ele
+        console.log('✅ Usuário já existe, fazendo login...');
+        userId = loginData.user.id;
+      } else {
+        // Usuário não existe, criar diretamente
+        console.log('📝 Criando novo usuário...');
+        
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password: senha,
+          options: {
+            emailRedirectTo: `${window.location.origin}/solo`,
+            data: {
+              full_name: nomeNegocio || email.split('@')[0],
+              account_type: 'solo',
+            }
           }
-        },
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Erro ao criar usuário");
-
-      // Verificar se precisa confirmar email
-      if (authData.user.identities && authData.user.identities.length === 0) {
-        toast({
-          title: "✉️ Confirme seu email",
-          description: "Enviamos um link de confirmação. Após confirmar, faça login.",
         });
-        router.push('/login');
+
+        if (signUpError) {
+          console.error('❌ Erro ao criar usuário:', signUpError);
+          throw new Error(`Não foi possível criar sua conta: ${signUpError.message}`);
+        }
+
+        if (!signUpData.user) {
+          throw new Error('Erro ao criar usuário');
+        }
+
+        console.log('✅ Usuário criado:', signUpData.user.id);
+        userId = signUpData.user.id;
+
+        // Fazer login
+        console.log('🔐 Fazendo login...');
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha,
+        });
+
+        if (signInError) {
+          console.error('❌ Erro no login:', signInError);
+          toast({
+            title: "Conta criada!",
+            description: "Faça login para acessar sua conta.",
+          });
+          router.push('/login');
+          return;
+        }
+
+        console.log('✅ Login realizado!');
+      }
+
+      console.log('✅ Autenticado! User ID:', userId);
+
+      // 3. Verificar se já tem empresa
+      const { data: perfilExistente } = await supabase
+        .from('perfis')
+        .select('empresa_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (perfilExistente?.empresa_id) {
+        console.log('✅ Usuário já tem empresa, redirecionando...');
+        toast({
+          title: "Bem-vindo de volta!",
+          description: "Você já tem uma conta cadastrada.",
+        });
+        router.push("/solo");
         return;
       }
 
-      // Se não precisa confirmar, fazer login
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: senha,
-      });
+      // 4. Criar empresa
+      console.log('🏢 Criando empresa...');
+      const { data: empresaData, error: empresaError } = await supabase
+        .from('empresas')
+        .insert({
+          nome: nomeNegocio || `${email.split('@')[0]} - Solo`,
+          is_solo: true,
+        })
+        .select()
+        .single();
 
-      if (signInError) {
-        toast({
-          title: "✉️ Confirme seu email",
-          description: "Enviamos um link de confirmação. Após confirmar, faça login.",
-        });
-        router.push('/login');
-        return;
+      if (empresaError) {
+        console.error('❌ Erro ao criar empresa:', empresaError);
+        throw new Error('Erro ao criar empresa');
       }
 
-      // Aguardar trigger criar empresa e perfil
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('✅ Empresa criada:', empresaData.id);
+
+      // 5. Criar perfil
+      console.log('👤 Criando perfil...');
+      const { error: perfilError } = await supabase
+        .from('perfis')
+        .insert({
+          user_id: userId,
+          empresa_id: empresaData.id,
+          role: 'owner',
+        });
+
+      if (perfilError) {
+        console.error('❌ Erro ao criar perfil:', perfilError);
+        throw new Error('Erro ao criar perfil');
+      }
+
+      console.log('✅ Perfil criado!');
 
       toast({
         title: "✓ Bem-vindo ao Venlo Solo!",
