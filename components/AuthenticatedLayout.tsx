@@ -53,7 +53,17 @@ export function AuthenticatedLayout({ children, requiredRole }: AuthenticatedLay
         return;
       }
 
-      const userRole = perfil.role as UserRole;
+      let userRole = perfil.role as UserRole;
+
+      // IMPORTANTE: Detectar contexto Solo
+      // Se o usuário veio de uma rota /solo/* ou se o referrer é /solo/*
+      // mantém o contexto Solo mesmo em páginas compartilhadas
+      const isSoloContext = pathname.startsWith('/solo') || 
+                           (typeof document !== 'undefined' && document.referrer.includes('/solo'));
+      
+      if (isSoloContext && userRole === 'owner') {
+        userRole = 'solo';
+      }
 
       // Verificar se o role é permitido para a rota
       if (requiredRole && userRole !== requiredRole) {
@@ -68,6 +78,8 @@ export function AuthenticatedLayout({ children, requiredRole }: AuthenticatedLay
       
       if (userRole === 'owner' && perfil.empresas) {
         displayName = (perfil.empresas as any).nome || displayName;
+      } else if (userRole === 'solo') {
+        displayName = 'Autônomo';
       } else {
         // Se for vendedor, buscar nome da tabela vendedores
         const { data: vendedor } = await supabase
