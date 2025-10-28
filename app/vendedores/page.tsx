@@ -1,0 +1,397 @@
+/**
+ * Página de CRUD de vendedores + atribuir kit
+ */
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase-browser";
+import { AuthenticatedLayout } from "@/components/AuthenticatedLayout";
+import { SkeletonTable } from "@/components/ui/SkeletonTable";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Edit, Users, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { KitForm } from "@/components/KitForm";
+
+interface Vendedor {
+  id: string;
+  nome: string;
+  telefone: string | null;
+  doc: string | null;
+  comissao_padrao: number;
+  ativo: boolean;
+}
+
+export default function VendedoresPage() {
+  const [vendedores, setVendedores] = useState<Vendedor[]>([]);
+  const [produtos, setProdutos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [doc, setDoc] = useState("");
+  const [comissaoPadrao, setComissaoPadrao] = useState(10);
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+
+  const supabase = createClient();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [vendedoresRes, produtosRes] = await Promise.all([
+        supabase.from("vendedores").select("id, nome, email, telefone, doc, ativo, comissao_padrao, criado_em").order("nome"),
+        supabase.from("produtos").select("id, nome, preco, unidade").eq("ativo", true),
+      ]);
+
+      setVendedores(vendedoresRes.data || []);
+      setProdutos(produtosRes.data || []);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (editingId) {
+        // Atualizar vendedor existente
+        const { error } = await supabase
+          .from("vendedores")
+          .update({
+            nome,
+            telefone,
+            documento: doc,
+            comissao_padrao: comissaoPadrao / 100,
+          })
+          .eq("id", editingId);
+
+        if (error) throw error;
+        
+        toast({ 
+          title: "Vendedor atualizado!",
+          description: "Dados atualizados com sucesso"
+        });
+      } else {
+        // Criar novo vendedor usando a API
+        if (!email || !senha) {
+          throw new Error("Email e senha são obrigatórios");
+        }
+
+        if (senha.length < 8) {
+          throw new Error("A senha deve ter no mínimo 8 caracteres");
+        }
+
+        // Chamar API para criar vendedor
+        const response = await fetch('/api/admin/create-seller', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nome,
+            email,
+            senha,
+            telefone: telefone || undefined,
+            documento: doc || undefined,
+            comissao_padrao: comissaoPadrao,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || data.message || 'Erro ao criar vendedor');
+        }
+
+        toast({ 
+          title: "Vendedor criado!",
+          description: data.message || `Login: ${email}`,
+        });
+      }
+
+      resetForm();
+      loadData();
+    } catch (error: any) {
+      console.error("Erro ao criar/atualizar vendedor:", error);
+      toast({
+        title: "Erro",
+        description: error.message || "Verifique os dados e tente novamente",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (vendedor: Vendedor) => {
+    setEditingId(vendedor.id);
+    setNome(vendedor.nome);
+    setTelefone(vendedor.telefone || "");
+    setDoc(vendedor.doc || "");
+    setComissaoPadrao(vendedor.comissao_padrao * 100);
+    setShowForm(true);
+  };
+
+  const resetForm = () => {
+    setNome("");
+    setTelefone("");
+    setDoc("");
+    setComissaoPadrao(10);
+    setEmail("");
+    setSenha("");
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const handleDelete = async () => {
+    if (!editingId) return;
+
+    const confirmDelete = confirm(
+      `Tem certeza que deseja excluir o vendedor "${nome}"? Esta ação não pode ser desfeita.`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from("vendedores")
+        .delete()
+        .eq("id", editingId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Vendedor excluído!",
+        description: "O vendedor foi removido com sucesso.",
+      });
+
+      resetForm();
+      loadData();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <AuthenticatedLayout requiredRole="owner">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)]">Vendedores</h1>
+            <p className="text-[var(--text-secondary)]">Gerencie sua equipe de vendas</p>
+          </div>
+          {!showForm && (
+            <Button
+              onClick={() => setShowForm(true)}
+              className="bg-[#0057FF] hover:bg-[#0046CC] text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Criar Vendedor
+            </Button>
+          )}
+        </div>
+
+        <Tabs defaultValue="lista">
+          <TabsList>
+            <TabsTrigger value="lista">Lista</TabsTrigger>
+            <TabsTrigger value="kit">Atribuir Kit</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="lista" className="space-y-4">
+            {showForm && (
+              <Card className="bg-white rounded-2xl border-[var(--border-soft)] shadow-sm">
+                <CardHeader>
+                  <CardTitle>{editingId ? "Editar Vendedor" : "Novo Vendedor"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="nome">Nome *</Label>
+                        <Input
+                          id="nome"
+                          value={nome}
+                          onChange={(e) => setNome(e.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="telefone">Telefone</Label>
+                        <Input
+                          id="telefone"
+                          value={telefone}
+                          onChange={(e) => setTelefone(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="doc">CPF/RG/Documento</Label>
+                        <Input
+                          id="doc"
+                          placeholder="123.456.789-00"
+                          value={doc}
+                          onChange={(e) => setDoc(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="comissao">Comissão (%) *</Label>
+                        <Input
+                          id="comissao"
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="100"
+                          value={comissaoPadrao}
+                          onChange={(e) => setComissaoPadrao(parseFloat(e.target.value))}
+                          required
+                        />
+                      </div>
+
+                      {!editingId && (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="vendedor@email.com"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              required
+                            />
+                            <p className="text-xs text-gray-500">Será usado para login</p>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="senha">Senha *</Label>
+                            <Input
+                              id="senha"
+                              type="password"
+                              placeholder="Mínimo 8 caracteres"
+                              value={senha}
+                              onChange={(e) => setSenha(e.target.value)}
+                              required
+                              minLength={8}
+                            />
+                            <p className="text-xs text-gray-500">Mínimo 8 caracteres</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button type="submit" className="vendr-btn-primary">
+                        {editingId ? "Atualizar" : "Criar"}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={resetForm}>
+                        Cancelar
+                      </Button>
+                      {editingId && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={handleDelete}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          Excluir vendedor
+                        </Button>
+                      )}
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card className="bg-white rounded-2xl border-[var(--border-soft)] shadow-sm">
+              <CardContent className="pt-6">
+                {loading ? (
+                  <SkeletonTable rows={5} columns={5} />
+                ) : vendedores.length === 0 ? (
+                  <EmptyState
+                    icon={<Users className="h-12 w-12" />}
+                    title="Nenhum vendedor cadastrado"
+                    description="Clique em 'Criar Vendedor' para adicionar seu primeiro vendedor."
+                    action={{
+                      label: "Criar Vendedor",
+                      onClick: () => setShowForm(true),
+                    }}
+                  />
+                ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Telefone</TableHead>
+                      <TableHead>Comissão</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {vendedores.map((vendedor) => (
+                      <TableRow key={vendedor.id}>
+                        <TableCell className="font-medium">{vendedor.nome}</TableCell>
+                        <TableCell>{vendedor.telefone || "-"}</TableCell>
+                        <TableCell>{(vendedor.comissao_padrao * 100).toFixed(1)}%</TableCell>
+                        <TableCell>
+                          <Badge variant={vendedor.ativo ? "default" : "outline"}>
+                            {vendedor.ativo ? "Ativo" : "Inativo"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleEdit(vendedor)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="kit">
+            <KitForm
+              vendedores={vendedores.filter((v) => v.ativo)}
+              produtos={produtos}
+              onSuccess={() => toast({ title: "Kit criado com sucesso!" })}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AuthenticatedLayout>
+  );
+}
