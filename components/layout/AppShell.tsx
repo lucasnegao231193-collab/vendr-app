@@ -1,22 +1,27 @@
 /**
  * AppShell Component - MODERNIZADO
  * Shell principal com Trust Blue Design System
- * ModernTopBar + ModernSidebar
+ * ModernTopBar + ModernSidebar + DrawerMenu
  */
 "use client";
 
+import { useState } from "react";
 import { ModernTopBar } from "../ModernTopBar";
 import { ModernSidebar } from "../ModernSidebar";
 import { BottomNav } from "./BottomNav";
+import { DrawerMenu } from "./DrawerMenu";
 import { UserRole } from "@/lib/navigation";
 
 interface AppShellProps {
   children: React.ReactNode;
   role: UserRole;
   userName?: string;
+  userEmail?: string;
 }
 
-export function AppShell({ children, role, userName }: AppShellProps) {
+export function AppShell({ children, role, userName, userEmail }: AppShellProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-trust-blue-900">
       {/* Sidebar - Desktop only */}
@@ -42,9 +47,21 @@ export function AppShell({ children, role, userName }: AppShellProps) {
         </main>
       </div>
 
+      {/* DrawerMenu - Mobile only */}
+      <DrawerMenu
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        role={role}
+        userName={userName}
+        userEmail={userEmail}
+      />
+
       {/* BottomNav - Mobile only */}
       <div className="lg:hidden">
-        <BottomNav role={role} />
+        <BottomNav 
+          role={role} 
+          onMenuClick={() => setIsDrawerOpen(true)}
+        />
       </div>
     </div>
   );
