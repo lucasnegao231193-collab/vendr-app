@@ -55,13 +55,28 @@ export function AuthenticatedLayout({ children, requiredRole }: AuthenticatedLay
 
       let userRole = perfil.role as UserRole;
 
-      // IMPORTANTE: Detectar contexto Solo
-      // Se o usuário veio de uma rota /solo/* ou se o referrer é /solo/*
-      // mantém o contexto Solo mesmo em páginas compartilhadas
-      const isSoloContext = pathname.startsWith('/solo') || 
-                           (typeof document !== 'undefined' && document.referrer.includes('/solo'));
+      // IMPORTANTE: Detectar e manter contexto Solo usando sessionStorage
+      // Se está em rota /solo/*, salva o contexto
+      if (pathname.startsWith('/solo')) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('soloContext', 'true');
+        }
+      }
       
-      if (isSoloContext && userRole === 'owner') {
+      // Se não está em rota /solo/* mas tem contexto Solo salvo, mantém
+      const hasSoloContext = typeof window !== 'undefined' && 
+                            sessionStorage.getItem('soloContext') === 'true';
+      
+      // Se está em rota de empresa, limpa o contexto Solo
+      if (pathname.startsWith('/dashboard') || pathname.startsWith('/vendedores') || 
+          pathname.startsWith('/relatorios') || pathname.startsWith('/financeiro')) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('soloContext');
+        }
+      }
+      
+      // Aplica contexto Solo se necessário
+      if ((pathname.startsWith('/solo') || hasSoloContext) && userRole === 'owner') {
         userRole = 'solo';
       }
 
