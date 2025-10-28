@@ -120,7 +120,7 @@ export function DrawerMenu({
     },
     {
       label: "Nova Venda",
-      href: "/solo/venda",
+      href: "/solo/venda-nova",
       icon: ShoppingCart,
       description: "Registrar venda",
     },
@@ -137,22 +137,22 @@ export function DrawerMenu({
       description: "Meus produtos",
     },
     {
-      label: "Catálogo",
-      href: "/catalogo",
+      label: "Serviços",
+      href: "/solo/servicos",
       icon: MapPin,
-      description: "Catálogo de produtos",
+      description: "Catálogo de serviços",
     },
     {
-      label: "Relatórios",
-      href: "/solo/relatorios",
+      label: "Financeiro",
+      href: "/solo/financeiro",
+      icon: Wallet,
+      description: "Gestão financeira",
+    },
+    {
+      label: "Assinatura",
+      href: "/solo/assinatura",
       icon: TrendingUp,
-      description: "Minhas estatísticas",
-    },
-    {
-      label: "Meu Negócio",
-      href: "/solo/empresa",
-      icon: Store,
-      description: "Dados do negócio",
+      description: "Planos e upgrade",
     },
   ];
 
