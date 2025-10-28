@@ -137,10 +137,16 @@ export function DrawerMenu({
       description: "Meus produtos",
     },
     {
+      label: "Catálogo",
+      href: "/catalogo",
+      icon: MapPin,
+      description: "Catálogo público",
+    },
+    {
       label: "Serviços",
       href: "/solo/servicos",
-      icon: MapPin,
-      description: "Catálogo de serviços",
+      icon: Store,
+      description: "Meus serviços",
     },
     {
       label: "Financeiro",
